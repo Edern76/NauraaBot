@@ -12,17 +12,13 @@ public static class ConfigProvider
     public static void LoadConfig()
     {
         string configFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "config.yml");
+        if (!File.Exists(configFilePath))
+        {
+            throw new FileNotFoundException("Config file not found", configFilePath);
+        }
         string yamlContent = File.ReadAllText(configFilePath);
 
         Deserializer deserializer = new Deserializer();
         ConfigInstance = deserializer.Deserialize<Config>(yamlContent);
-        
-        foreach ( FieldInfo FI in ConfigInstance.GetType().GetFields () )
-        {
-            if (FI.GetValue (ConfigInstance) is string s && s.Length == 0)
-            {
-                FI.SetValue(ConfigInstance, null);
-            }
-        }
     }
 }

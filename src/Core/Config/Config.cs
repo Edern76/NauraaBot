@@ -1,9 +1,15 @@
-﻿namespace NauraaBot.Core.Config;
+﻿using YamlDotNet.Serialization;
+
+namespace NauraaBot.Core.Config;
 
 public class Config
 {
-    public string token;
-    public string? db_path;
-    public string database;
-    public string? password;
+    [YamlMember(Alias = "token")]
+    public string token { get; set; }
+    [YamlMember(Alias = "db_path")]
+    public string? db_path {get; set;}
+    [YamlMember(Alias = "database")]
+    public string database {get; set;}
+    [YamlMember(Alias = "password")]
+    public string? password { get; set; }
 }

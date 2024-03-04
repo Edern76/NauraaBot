@@ -1,4 +1,4 @@
-token:
+token: ~
 database: NauraaBot.db
-db_path:
-password:
+db_path:  ~
+password: ~

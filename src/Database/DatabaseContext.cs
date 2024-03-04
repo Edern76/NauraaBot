@@ -9,8 +9,6 @@ namespace NauraaBot.Database;
 
 public class DatabaseContext : DbContext
 {
-    private string DbPath { get; set; }
-    
     public DbSet<Card> Cards;
     public DbSet<Faction> Factions;
     public DbSet<CardSet> Sets;
@@ -18,19 +16,7 @@ public class DatabaseContext : DbContext
 
     public DatabaseContext()
     {
-        Config config = ConfigProvider.ConfigInstance;
-        string basePath = config.db_path;
-        if (basePath is null)
-        {
-            LogUtils.Log("No set path for database, using default");
-            basePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        }
-        if (config.database is null)
-        {
-            LogUtils.Log("No database name set, using default");
-            config.database = "NauraaBot.db";
-        }
-        DbPath = Path.Combine(basePath, config.database); 
+        // Dotnet really DOES NOT want to have anything in here, so in OnConfiguring stuff goes
     }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,12 +32,35 @@ public class DatabaseContext : DbContext
             new Rarity{ID="RARE", Name="Rare", Short="R"}, 
             new Rarity{ID="UNIQUE", Name="Unique", Short="U"}
             );
+        modelBuilder.Entity<CardSet>();
+        modelBuilder.Entity<Card>();
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        string connectionString = $"Data Source={DbPath};";
+        LogUtils.Log("Creating context");
+        Config config = ConfigProvider.ConfigInstance;
+        if (config is null)
+        {
+            ConfigProvider.LoadConfig(); // Workaround to get migrations working
+            config = ConfigProvider.ConfigInstance;
+        }
+        string basePath = config.db_path;
+        if (basePath is null)
+        {
+            LogUtils.Log("No set path for database, using default");
+            basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NauraaBot");
+        }
+        if (config.database is null)
+        {
+            LogUtils.Log("No database name set, using default");
+            config.database = "NauraaBot.db";
+        }
+        Directory.CreateDirectory(basePath);
+        string dbPath = Path.Combine(basePath, config.database);
+        LogUtils.Log($"Database path: {dbPath}");
+        string connectionString = $"Data Source={dbPath};";
         if (ConfigProvider.ConfigInstance.password is not null)
         {
             connectionString += $"Password={ConfigProvider.ConfigInstance.password};";
