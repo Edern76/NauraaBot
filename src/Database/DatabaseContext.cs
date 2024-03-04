@@ -33,6 +33,7 @@ public class DatabaseContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        // DotNet really DOES NOT like to have anything in constructor so we dump everything in here
         base.OnConfiguring(optionsBuilder);
         LogUtils.Log("Creating context");
         Config config = ConfigProvider.ConfigInstance;
