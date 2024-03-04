@@ -13,11 +13,6 @@ public class DatabaseContext : DbContext
     public DbSet<Faction> Factions;
     public DbSet<CardSet> Sets;
     public DbSet<Rarity> Rarities;
-
-    public DatabaseContext()
-    {
-        // Dotnet really DOES NOT want to have anything in here, so in OnConfiguring stuff goes
-    }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
