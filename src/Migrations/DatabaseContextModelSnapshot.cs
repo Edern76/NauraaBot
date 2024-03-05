@@ -59,6 +59,36 @@ namespace NauraaBot.Migrations
                     b.ToTable("CardSet");
                 });
 
+            modelBuilder.Entity("NauraaBot.Database.Models.CardType", b =>
+                {
+                    b.Property<string>("ID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("CardType");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = "HERO",
+                            Name = "Hero"
+                        },
+                        new
+                        {
+                            ID = "SPELL",
+                            Name = "Spell"
+                        },
+                        new
+                        {
+                            ID = "PERMANENT",
+                            Name = "Permanent"
+                        });
+                });
+
             modelBuilder.Entity("NauraaBot.Database.Models.Faction", b =>
                 {
                     b.Property<string>("ID")
@@ -178,6 +208,34 @@ namespace NauraaBot.Migrations
                                 .HasForeignKey("CardID");
                         });
 
+                    b.OwnsOne("NauraaBot.Core.Utils.LocalizedString", "ImagesURLs", b1 =>
+                        {
+                            b1.Property<string>("CardID")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("de")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("en")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("es")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("fr")
+                                .HasColumnType("TEXT");
+
+                            b1.Property<string>("it")
+                                .HasColumnType("TEXT");
+
+                            b1.HasKey("CardID");
+
+                            b1.ToTable("Card");
+
+                            b1.WithOwner()
+                                .HasForeignKey("CardID");
+                        });
+
                     b.OwnsOne("NauraaBot.Core.Utils.LocalizedString", "Names", b1 =>
                         {
                             b1.Property<string>("CardID")
@@ -252,6 +310,8 @@ namespace NauraaBot.Migrations
                     b.Navigation("CurrentFaction");
 
                     b.Navigation("Effect");
+
+                    b.Navigation("ImagesURLs");
 
                     b.Navigation("MainFaction");
 

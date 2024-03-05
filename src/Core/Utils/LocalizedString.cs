@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace NauraaBot.Core.Utils;
 
@@ -10,4 +11,17 @@ public class LocalizedString
     public string de { get; set; }
     public string es { get; set; }
     public string it { get; set; }
+    
+    // Using reflection would be cleaner but VERY slow, especially considering we're gonna do this for each card
+    public Dictionary<string, string> ToDictionary()
+    {
+        return new Dictionary<string, string>
+        {
+            { "en", en },
+            { "fr", fr },
+            { "de", de },
+            { "es", es },
+            { "it", it }
+        };
+    }
 }

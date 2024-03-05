@@ -1,15 +1,19 @@
-﻿using YamlDotNet.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using YamlDotNet.Serialization;
 
 namespace NauraaBot.Core.Config;
 
 public class Config
 {
+    [YamlMember(Alias = "additional_languages")]
+    public List<String> AdditionalLanguages { get; set; }
     [YamlMember(Alias = "token")]
-    public string token { get; set; }
+    public string Token { get; set; }
     [YamlMember(Alias = "db_path")]
-    public string? db_path {get; set;}
+    public string? DbPath {get; set;}
     [YamlMember(Alias = "database")]
-    public string database {get; set;}
+    public string Database {get; set;}
     [YamlMember(Alias = "password")]
-    public string? password { get; set; }
+    public string? Password { get; set; }
 }

@@ -12,6 +12,7 @@ public class Card
     public DateTime LastUpdated { get; set; }
     public Faction MainFaction { get; set; }
     public Faction CurrentFaction { get; set; }
+    public LocalizedString ImagesURLs { get; set; }
     public LocalizedString Names { get; set; }
     public LocalizedString Effect { get; set; }
     public Costs? Costs { get; set; }

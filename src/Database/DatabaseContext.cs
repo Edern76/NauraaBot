@@ -27,6 +27,10 @@ public class DatabaseContext : DbContext
             new Rarity{ID="RARE", Name="Rare", Short="R"}, 
             new Rarity{ID="UNIQUE", Name="Unique", Short="U"}
             );
+        modelBuilder.Entity<CardType>().HasData(new CardType{ID="HERO", Name="Hero"}, 
+            new CardType{ID="SPELL", Name="Spell"}, 
+            new CardType{ID="PERMANENT", Name="Permanent"}
+            );
         modelBuilder.Entity<CardSet>();
         modelBuilder.Entity<Card>();
     }
@@ -42,24 +46,24 @@ public class DatabaseContext : DbContext
             ConfigProvider.LoadConfig(); // Workaround to get migrations working
             config = ConfigProvider.ConfigInstance;
         }
-        string basePath = config.db_path;
+        string basePath = config.DbPath;
         if (basePath is null)
         {
             LogUtils.Log("No set path for database, using default");
             basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NauraaBot");
         }
-        if (config.database is null)
+        if (config.Database is null)
         {
             LogUtils.Log("No database name set, using default");
-            config.database = "NauraaBot.db";
+            config.Database = "NauraaBot.db";
         }
         Directory.CreateDirectory(basePath);
-        string dbPath = Path.Combine(basePath, config.database);
+        string dbPath = Path.Combine(basePath, config.Database);
         LogUtils.Log($"Database path: {dbPath}");
         string connectionString = $"Data Source={dbPath};";
-        if (ConfigProvider.ConfigInstance.password is not null)
+        if (ConfigProvider.ConfigInstance.Password is not null)
         {
-            connectionString += $"Password={ConfigProvider.ConfigInstance.password};";
+            connectionString += $"Password={ConfigProvider.ConfigInstance.Password};";
         }
         optionsBuilder.UseSqlite(connectionString);
         

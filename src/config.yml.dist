@@ -1,4 +1,6 @@
-token: ~
+additional_languages: # English is already included
+  - fr
 database: NauraaBot.db
 db_path:  ~
 password: ~
+token: placeholder
