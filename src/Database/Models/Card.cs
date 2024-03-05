@@ -6,17 +6,20 @@ namespace NauraaBot.Database.Models;
 
 public class Card
 {
+
     public string ID { get; set; } // Card reference
-    public string SetCode { get; set; }
-    public string RarityCode { get; set; }
+    public CardSet Set { get; set; }
+    public Rarity Rarity { get; set; }
     public DateTime LastUpdated { get; set; }
     public Faction MainFaction { get; set; }
     public Faction CurrentFaction { get; set; }
-    public LocalizedString ImagesURLs { get; set; }
-    public LocalizedString Names { get; set; }
-    public LocalizedString Effect { get; set; }
+    public LocalizedString ImagesURLs { get; set; } = new LocalizedString();
+    public LocalizedString Names { get; set; } = new LocalizedString();
+    public LocalizedString Effect { get; set; } = new LocalizedString();
     public Costs? Costs { get; set; }
     public Power? Power { get; set; }
+    
+    
 }
 
 
