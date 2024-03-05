@@ -37,7 +37,6 @@ public static class AlteredAPIRequester
         RestResponse response = await _client.ExecuteGetAsync(request);
         string content = response!.Content.Replace("\\/", "/").Replace('\u00A0', ' ')
            .Replace('\u00A9', ' '); // TODO: Find a way to replace \u0022 with " without messing everything up
-        LogUtils.Log($"Response : {content}");
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
         return JsonConvert.DeserializeObject<AlteredResponse>(content);
     }
