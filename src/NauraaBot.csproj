@@ -8,9 +8,10 @@
     <ItemGroup>
       <None Update="config.yml">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       </None>
       <None Update="config.yml.dist">
-        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
       </None>
     </ItemGroup>
 
