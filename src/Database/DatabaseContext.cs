@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
@@ -14,6 +15,16 @@ public class DatabaseContext : DbContext
     public DbSet<CardSet> Sets { get; set; }
     public DbSet<CardType> Types { get; set; }
     public DbSet<Rarity> Rarities { get; set; }
+
+    public void UpdateCard(Card card)
+    {
+        Card existingCard = this.Cards.Local.SingleOrDefault(c => c.ID == card.ID);
+        if (existingCard != null)
+        {
+            this.Entry(existingCard).State = EntityState.Detached;
+        }
+        this.Update(card);
+    }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

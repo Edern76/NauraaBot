@@ -43,7 +43,7 @@ public static class CardImportManager
                 }
                 else
                 {
-                    DatabaseProvider.Db.Update(card);
+                    DatabaseProvider.Db.UpdateCard(card);
                 }
                 cardsImported++;
             }

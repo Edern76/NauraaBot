@@ -7,6 +7,7 @@ using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database;
 using NauraaBot.Database.Models;
+using NauraaBot.Discord;
 using NauraaBot.Managers;
 
 namespace NauraaBot
@@ -22,6 +23,10 @@ namespace NauraaBot
             {
                 await CardImportManager.ImportCardsIntoDatabase();
             }
+            
+            // TODO : Schedule periodic card import
+            
+            await ClientProvider.InitializeClient(ConfigProvider.ConfigInstance.Token);
 
             await Task.Delay(-1);
         }

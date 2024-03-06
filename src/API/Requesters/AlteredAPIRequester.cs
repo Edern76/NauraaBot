@@ -36,7 +36,7 @@ public static class AlteredAPIRequester
         request.AddParameter("pagination", "false");
         RestResponse response = await _client.ExecuteGetAsync(request);
         string content = response!.Content.Replace("\\/", "/").Replace('\u00A0', ' ')
-           .Replace('\u00A9', ' '); // TODO: Find a way to replace \u0022 with " without messing everything up
+           .Replace('\u00A9', ' ').Replace('\u0026', '&'); // TODO: Find a way to replace \u0022 with " without messing everything up
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
         return JsonConvert.DeserializeObject<AlteredResponse>(content);
     }

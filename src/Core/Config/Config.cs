@@ -7,27 +7,29 @@ namespace NauraaBot.Core.Config;
 public class Config
 {
     private List<String> _additionalLanguages;
+
     [YamlMember(Alias = "additional_languages")]
-    public List<String> AdditionalLanguages { get => _additionalLanguages; //YamlDotNet does not want to have the getter private but you SHOULD NOT access this
+    public List<String> AdditionalLanguages
+    {
+        get => _additionalLanguages; //YamlDotNet does not want to have the getter private but you SHOULD NOT access this
         set
         {
             _additionalLanguages = value;
             SupportedLanguages = new HashSet<string>(_additionalLanguages);
             SupportedLanguages.Add("en");
-        } 
+        }
     }
-    
+
     public HashSet<String> SupportedLanguages { get; private set; }
-    [YamlMember(Alias = "token")]
-    public string Token { get; set; }
+    [YamlMember(Alias = "token")] public string Token { get; set; }
+
     [YamlMember(Alias = "force_update_db_on_start")]
     public bool ForceUpdateDbOnStart { get; set; }
-    [YamlMember(Alias = "db_path")]
-    public string? DbPath {get; set;}
-    [YamlMember(Alias = "database")]
-    public string Database {get; set;}
-    [YamlMember(Alias = "password")]
-    public string? Password { get; set; }
-    
-    
+
+    [YamlMember(Alias = "db_path")] public string? DbPath { get; set; }
+    [YamlMember(Alias = "database")] public string Database { get; set; }
+    [YamlMember(Alias = "password")] public string? Password { get; set; }
+
+    [YamlMember(Alias = "max_replies_per_messages")]
+    public int MaxRepliesPerMessages { get; set; }
 }

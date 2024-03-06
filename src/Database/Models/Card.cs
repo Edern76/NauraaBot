@@ -1,6 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
+using NauraaBot.Core;
+using NauraaBot.Core.Types;
 using NauraaBot.Core.Utils;
 
 namespace NauraaBot.Database.Models;
@@ -21,6 +23,32 @@ public class Card
     public LocalizedString Effect { get; set; } = new LocalizedString();
     public Costs? Costs { get; set; }
     public Power? Power { get; set; }
+
+    public CardRecap ToCardRecap(string language="en")
+    {
+        CardRecap recap = new CardRecap()
+        {
+            Name = this.Names.Get(language),
+            URL = $"https://altered.gg/{Constants.LanguageHttpCodes[language].ToLower()}/cards/{this.ID}",
+            ImageURL = this.ImagesURLs.Get(language),
+            CardType = this.Type.Name,
+            Rarity = this.Rarity.Name,
+            CardSet = this.Set.Name,
+            CurrentFaction = this.CurrentFaction.Name,
+            Effect = this.Effect.Get(language)
+        };
+        if (this.Costs is not null)
+        {
+            recap.CostString = $"{this.Costs.Hand}/{this.Costs.Reserve}";
+        }
+
+        if (this.Power is not null)
+        {
+            recap.PowerString = $"{this.Power.Forest}/{this.Power.Mountain}/{this.Power.Ocean}";
+        }
+
+        return recap;
+    }
     
     
 }

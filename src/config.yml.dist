@@ -3,5 +3,6 @@ additional_languages: # English is already included
 database: NauraaBot.db
 db_path:  ~
 force_update_db_on_start: false
+max_replies_per_message: 5
 password: ~
 token: placeholder
