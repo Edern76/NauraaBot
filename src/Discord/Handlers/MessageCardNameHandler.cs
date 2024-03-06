@@ -36,7 +36,7 @@ public static class MessageCardNameHandler
 
         try
         {
-            MatchCollection matches = Regex.Matches(message.Content, @"/\{\{([^\}]+)\}\}/g");
+            MatchCollection matches = Regex.Matches(message.Content, @"\{\{([^\}]+)\}\}");
             List<Embed> embedsToSend = new List<Embed>();
             foreach (Match match in matches)
             {
@@ -132,13 +132,17 @@ public static class MessageCardNameHandler
     {
         EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
             .WithUrl(recap.URL)
-            .WithImageUrl(recap.ImageURL)
             .WithThumbnailUrl(recap.ImageURL)
             .WithDescription(recap.Effect)
             .AddField("Type", recap.CardType, true)
             .AddField("Rarity", recap.Rarity, true)
             .AddField("Set", recap.CardSet, true)
             .AddField("Current faction", recap.CurrentFaction, true);
+
+        if (ConfigProvider.ConfigInstance.BigImage)
+        {
+            builder = builder.WithImageUrl(recap.ImageURL);
+        }
 
         if (recap.CostString is not null)
         {

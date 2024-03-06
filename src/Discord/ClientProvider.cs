@@ -16,6 +16,7 @@ public static class ClientProvider
         LogUtils.Log("Starting Discord client...");
         Client = new DiscordSocketClient(new DiscordSocketConfig
         {
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
             LogLevel = LogSeverity.Info,
             MessageCacheSize = 100
         });

@@ -11,9 +11,11 @@ public static class CardSearchManager
     {
         // TODO : Support for multiple languages
         // TODO : Allow for searching even if entered name is not exact (Levenshtein distance, full text search ?)
+        // TODO : Add promo support
 
         List<Card> potentialMatches = DatabaseProvider.Db.Cards.Where(card => card.Names.en == name)
-            .Include(card => card.CurrentFaction).Include(card => card.MainFaction).Include(card => card.Rarity).ToList();
+            .Include(card => card.CurrentFaction).Include(card => card.MainFaction).Include(card => card.Rarity)
+            .ToList();
         // TODO : Error check on invalid faction/rarity
         if (factionID is not null)
         {
@@ -21,7 +23,9 @@ public static class CardSearchManager
         }
         else
         {
-            potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID == card.MainFaction.ID); // Exclude out of factions
+            potentialMatches =
+                potentialMatches.FindAll(card =>
+                    card.CurrentFaction.ID == card.MainFaction.ID); // Exclude out of factions
         }
 
         Card result;

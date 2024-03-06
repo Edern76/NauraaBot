@@ -23,6 +23,8 @@ public class Config
     public HashSet<String> SupportedLanguages { get; private set; }
     [YamlMember(Alias = "token")] public string Token { get; set; }
 
+    [YamlMember(Alias = "big_image")] public bool BigImage { get; set; }
+
     [YamlMember(Alias = "force_update_db_on_start")]
     public bool ForceUpdateDbOnStart { get; set; }
 
@@ -30,6 +32,6 @@ public class Config
     [YamlMember(Alias = "database")] public string Database { get; set; }
     [YamlMember(Alias = "password")] public string? Password { get; set; }
 
-    [YamlMember(Alias = "max_replies_per_messages")]
+    [YamlMember(Alias = "max_replies_per_message")]
     public int MaxRepliesPerMessages { get; set; }
 }
