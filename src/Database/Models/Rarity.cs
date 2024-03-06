@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NauraaBot.Database.Models;
 
+[Table("Rarity")]
 public class Rarity
 {
     [Key]

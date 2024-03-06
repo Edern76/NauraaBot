@@ -2,5 +2,6 @@ additional_languages: # English is already included
   - fr
 database: NauraaBot.db
 db_path:  ~
+force_update_db_on_start: false
 password: ~
 token: placeholder

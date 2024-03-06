@@ -9,10 +9,11 @@ namespace NauraaBot.Database;
 
 public class DatabaseContext : DbContext
 {
-    public DbSet<Card> Cards;
-    public DbSet<Faction> Factions;
-    public DbSet<CardSet> Sets;
-    public DbSet<Rarity> Rarities;
+    public DbSet<Card> Cards { get; set; }
+    public DbSet<Faction> Factions { get; set; }
+    public DbSet<CardSet> Sets { get; set; }
+    public DbSet<CardType> Types { get; set; }
+    public DbSet<Rarity> Rarities { get; set; }
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

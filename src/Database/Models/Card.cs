@@ -1,14 +1,17 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Utils;
 
 namespace NauraaBot.Database.Models;
 
+[Table("Card")]
 public class Card
 {
 
     public string ID { get; set; } // Card reference
     public CardSet Set { get; set; }
+    public CardType Type { get; set; }
     public Rarity Rarity { get; set; }
     public DateTime LastUpdated { get; set; }
     public Faction MainFaction { get; set; }

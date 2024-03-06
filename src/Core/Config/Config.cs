@@ -20,6 +20,8 @@ public class Config
     public HashSet<String> SupportedLanguages { get; private set; }
     [YamlMember(Alias = "token")]
     public string Token { get; set; }
+    [YamlMember(Alias = "force_update_db_on_start")]
+    public bool ForceUpdateDbOnStart { get; set; }
     [YamlMember(Alias = "db_path")]
     public string? DbPath {get; set;}
     [YamlMember(Alias = "database")]
