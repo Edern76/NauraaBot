@@ -48,8 +48,8 @@ Where you replace `AX` with the first two letters of the out of faction faction.
 - Go to the `src` folder
 - Copy the `config.yml.dist` r and rename the copy to `config.yml`
 - Modify the `config.yml` according to your needs. Make sure you fill in your bot token.
-- Run `dotnet ef database upgdate`
-- Run `dotnet publish -c Release -p:PublishSignleFile=true -r <RID>` where RID is your platform's [runtime ID](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog)
+- Run `dotnet ef database update`
+- Run `dotnet publish -c Release -p:PublishSingleFile=true -r <RID>` where RID is your platform's [runtime ID](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog). The application will be compiled in : `\bin\Release\net6.0\<RID>\publish`
 
 ## FAQ
 
