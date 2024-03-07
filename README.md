@@ -11,7 +11,7 @@ Add it to your Discord server by cicking [this link](http://placeholder), or loo
 In any channel on a server where the bot is present, summon it by typing
 
 ```
-{{Card name}}
+{{Card Name}}
 ```
 
 This should be the **exact English** name of the card you're looking for. Support for other languages and approximate search terms is planned for a future version.
@@ -19,13 +19,13 @@ This should be the **exact English** name of the card you're looking for. Suppor
 You can also get the rare in faction version by typing :
 
 ```
-{{Card name|R}}
+{{Card Name|R}}
 ``` 
 
 And the out of faction one with :
 
 ```
-{{Card name|R, AX}}
+{{Card Name|R, AX}}
 ```
 
 Where you replace `AX` with the first two letters of the out of faction faction.
