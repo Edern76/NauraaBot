@@ -13,7 +13,7 @@ public static class CardSearchManager
         // TODO : Allow for searching even if entered name is not exact (Levenshtein distance, full text search ?)
         // TODO : Add promo support
 
-        List<Card> potentialMatches = DatabaseProvider.Db.Cards.Where(card => card.Names.en == name)
+        List<Card> potentialMatches = DatabaseProvider.Db.Cards.Where(card => card.Names.en.ToLower() == name.ToLower())
             .Include(card => card.CurrentFaction).Include(card => card.MainFaction).Include(card => card.Rarity)
             .ToList();
         // TODO : Error check on invalid faction/rarity
@@ -38,7 +38,7 @@ public static class CardSearchManager
             result = potentialMatches.Find(card => card.Rarity.Short == "C"); // Default to common
             if (result is null)
             {
-                result = potentialMatches.First(); // If no common is available we just take the first one
+                result = potentialMatches.FirstOrDefault(); // If no common is available we just take the first one
             }
         }
 

@@ -109,7 +109,8 @@ public static class MessageCardNameHandler
             {
                 result = new EmbedBuilder().WithTitle("Not found")
                     .WithDescription(
-                        "The card with name ${cardName} was not found. \n Make sure the name matches exactly the name of the card (search with approximate names may come in a future version)")
+                        $"The card with name {cardName} was not found. \n Make sure the name matches exactly the name of the card (search with approximate names may come in a future version)")
+                    .WithColor(Color.Orange)
                     .Build();
             }
             else
@@ -122,6 +123,7 @@ public static class MessageCardNameHandler
         {
             result = new EmbedBuilder().WithTitle("Invalid format")
                 .WithDescription($"The search query \"{iqfe.Query}\"'s format has not been recognized.")
+                .WithColor(Color.Orange)
                 .Build();
         }
 
@@ -131,6 +133,7 @@ public static class MessageCardNameHandler
     private static Embed CardRecapToEmbed(CardRecap recap)
     {
         EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
+            .WithColor(Color.Blue)
             .WithUrl(recap.URL)
             .WithThumbnailUrl(recap.ImageURL)
             .WithDescription(recap.Effect)
