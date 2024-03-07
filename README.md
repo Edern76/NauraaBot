@@ -4,7 +4,7 @@
 
 A card fetching Discord bot for Altered TCG
 
-Add it to your Discord server by cicking [this link](http://placeholder), or look below if you're looking to self host
+Add it to your Discord server by cicking [this link]([http://placeholder](https://discord.com/oauth2/authorize?client_id=1214980379216318606&permissions=824633838592&scope=bot)), or look below if you're looking to self host
 
 ## Usage
 
@@ -48,7 +48,7 @@ Where you replace `AX` with the first two letters of the out of faction faction.
 - Go to the `src` folder
 - Copy the `config.yml.dist` r and rename the copy to `config.yml`
 - Modify the `config.yml` according to your needs. Make sure you fill in your bot token.
-- Run `dotnet ef database update`
+- Run `dotnet ef database update` or `dotnet-ef database update`
 - Run `dotnet publish -c Release -p:PublishSingleFile=true -r <RID>` where \<RID\> is your platform's [runtime ID](https://learn.microsoft.com/en-us/dotnet/core/rid-catalog). The application will be compiled in : `\bin\Release\net6.0\<RID>\publish`
 
 ## FAQ
