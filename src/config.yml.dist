@@ -6,4 +6,5 @@ db_path:  ~
 force_update_db_on_start: false
 max_replies_per_message: 5
 password: ~
+update_periodicity: 0 0 0 1/1 * ? *
 token: placeholder

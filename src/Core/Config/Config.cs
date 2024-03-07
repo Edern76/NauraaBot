@@ -34,4 +34,7 @@ public class Config
 
     [YamlMember(Alias = "max_replies_per_message")]
     public int MaxRepliesPerMessages { get; set; }
+
+    [YamlMember(Alias = "update_periodicity")]
+    public string UpdatePeriodicity { get; set; }
 }

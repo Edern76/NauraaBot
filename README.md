@@ -64,3 +64,9 @@ Possibly, but this is not a priority right now.
 ### What about a pre-compiled version ?
 
 This is more likely to come soon, but I need to figure out how to handle database migrations on a compiled executable. I know about `db.Migrate()`, but I've seen many different disclaimers to not use that ever in production. Bundling an empty migrated database with the releases would also be an option, but that doesn't sound optimal either. In short, I need to find the cleanest way to handle this.
+
+# Acknowledgments
+
+Thanks to `mangofeet` from the Altered Discord for answering my questions about the API.
+
+Altered is the property of Equinox. This project is an unofficial fanmade endeavor which is no way affiliated to or endorsed by Equinox.
