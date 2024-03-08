@@ -29,14 +29,16 @@ public static class CardSearchManager
         string? actualLanguage = language;
         if (language is not null)
         {
-            potentialMatches = allCards.FindAll(card => card.Names.Get(language) == name);
+            potentialMatches = allCards.FindAll(card =>
+                string.Equals(card.Names.Get(language), name, StringComparison.CurrentCultureIgnoreCase));
         }
         else
         {
             foreach (string supportedLanguage in
                      ConfigProvider.ConfigInstance.SupportedLanguages) // Ugly but we're gonna replace this soon anyways
             {
-                potentialMatches = allCards.FindAll(card => card.Names.Get(supportedLanguage) == name);
+                potentialMatches =
+                    allCards.FindAll(card => string.Equals(card.Names.Get(supportedLanguage), name, StringComparison.CurrentCultureIgnoreCase));
                 if (potentialMatches is not null && potentialMatches.Count > 0)
                 {
                     actualLanguage = supportedLanguage;
