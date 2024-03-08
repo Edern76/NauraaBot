@@ -4,7 +4,7 @@
 
 A card fetching Discord bot for Altered TCG
 
-Add it to your Discord server by cicking [this link](https://discord.com/oauth2/authorize?client_id=1214980379216318606&permissions=824633838592&scope=bot), or look below if you're looking to self host
+Add it to your Discord server by clicking [this link](https://discord.com/oauth2/authorize?client_id=1214980379216318606&permissions=824633838592&scope=bot), or look below if you're looking to self host
 
 ## Usage
 
@@ -14,7 +14,7 @@ In any channel on a server where the bot is present, summon it by typing
 {{Card Name}}
 ```
 
-This should be the **exact English** name of the card you're looking for. Support for other languages and approximate search terms is planned for a future version.
+This should be the **exact** name of the card you're looking for. Support for approximate search terms is planned for a future version.
 
 You can also get the rare in faction version by typing :
 
@@ -25,10 +25,15 @@ You can also get the rare in faction version by typing :
 And the out of faction one with :
 
 ```
-{{Card Name|R, AX}}
+{{Card Name|R, OOF}}
 ```
 
-Where you replace `AX` with the first two letters of the out of faction faction.
+You can also specify the language in which to get the results in the case you have a card that has the same name in multiple languages (ex : Kitsune, Parvati) like this
+```
+{{Card Name||FR}}
+OR
+{{Card Name|R|FR}}
+```
 
 ## Requirements
 
@@ -37,10 +42,10 @@ Where you replace `AX` with the first two letters of the out of faction faction.
 
 ## Planned features
 
-- Support for other languages than English (top priority)
 - Support for approximate search terms
 - Message throttling per user
-- Support for promo cards fetching
+- Faction emojis
+- Ability to see only a picture of the card by prefixing the card name with `!`
 - And more
 
 ## Compiling
