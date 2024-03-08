@@ -4,7 +4,7 @@
 
 A card fetching Discord bot for Altered TCG
 
-Add it to your Discord server by cicking [this link]([http://placeholder](https://discord.com/oauth2/authorize?client_id=1214980379216318606&permissions=824633838592&scope=bot)), or look below if you're looking to self host
+Add it to your Discord server by cicking [this link]((https://discord.com/oauth2/authorize?client_id=1214980379216318606&permissions=824633838592&scope=bot)), or look below if you're looking to self host
 
 ## Usage
 
