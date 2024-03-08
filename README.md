@@ -46,6 +46,7 @@ OR
 - Message throttling per user
 - Faction emojis
 - Ability to see only a picture of the card by prefixing the card name with `!`
+- Abilty to get a random card
 - And more
 
 ## Compiling
