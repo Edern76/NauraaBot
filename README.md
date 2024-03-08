@@ -42,10 +42,10 @@ OR
 
 ## Planned features
 
-- Support for other languages than English (top priority)
 - Support for approximate search terms
 - Message throttling per user
-- Support for promo cards fetching
+- Faction emojis
+- Ability to see only a picture of the card by prefixing the card name with `!`
 - And more
 
 ## Compiling
