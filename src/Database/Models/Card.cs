@@ -27,7 +27,6 @@ public class Card
 
     public CardRecap ToCardRecap(string language = "en")
     {
-        LogUtils.Log($"Language : {language}");
         string name = this.Names.Get(language);
         string imageUrl = this.ImagesURLs.Get(language);
         string cardType = this.Type.Name;
