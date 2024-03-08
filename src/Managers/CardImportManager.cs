@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
 using NauraaBot.API.DTO;
 using NauraaBot.API.Requesters;
+using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
 
@@ -25,7 +26,7 @@ public static class CardImportManager
 
         List<Card> existingCards = DatabaseProvider.Db.Cards.ToList();
         List<string> existingCardsIds = existingCards.Select(card => card.ID).ToList();
-        
+
         List<CardSet> sets = DatabaseProvider.Db.Sets.ToList();
         List<CardType> types = DatabaseProvider.Db.Types.ToList();
         List<Rarity> rarities = DatabaseProvider.Db.Rarities.ToList();
@@ -34,7 +35,9 @@ public static class CardImportManager
         foreach (CardDTO dto in dtos)
         {
             // TODO : Store last update time in database and use that to find updated cards instead of checking each card
-            if (!existingCardsIds.Contains(dto.Reference) || existingCards.First(card => card.ID == dto.Reference).LastUpdated < DateTime.Parse(dto.UpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind))
+            if (!existingCardsIds.Contains(dto.Reference) ||
+                existingCards.First(card => card.ID == dto.Reference).LastUpdated < DateTime.Parse(dto.UpdatedAt, null,
+                    System.Globalization.DateTimeStyles.RoundtripKind))
             {
                 Card card = CreateCard(dto, sets, types, rarities, factions);
                 if (!existingCardsIds.Contains(card.ID))
@@ -45,6 +48,7 @@ public static class CardImportManager
                 {
                     DatabaseProvider.Db.UpdateCard(card);
                 }
+
                 cardsImported++;
             }
         }
@@ -56,12 +60,50 @@ public static class CardImportManager
         }
         else
         {
-            LogUtils.Log("No cards to import or update.");
+            LogUtils.Log("No english cards to import or update.");
         }
-        
+
+        await FillMissingLanguages();
+
         DateTime end = DateTime.Now;
-        LogUtils.Log($"Card import finished in {(end-start).TotalSeconds} seconds.");
-        
+        LogUtils.Log($"Card import finished in {(end - start).TotalSeconds} seconds.");
+    }
+
+    private static async Task FillMissingLanguages()
+    {
+        LogUtils.Log("Checking for missing languages...");
+        List<Card> cardsMissingLanguages =
+            DatabaseProvider.Db.Cards.ToList().Where(c => c.GetMissingLanguages().Count > 0).ToList();
+        if (cardsMissingLanguages.Count > 0)
+        {
+            LogUtils.Log($"{cardsMissingLanguages.Count} cards are missing languages.");
+            Dictionary<string, List<CardDTO>> languageDtos = new Dictionary<string, List<CardDTO>>();
+            IEnumerable<String> supportedLanguages =
+                ConfigProvider.ConfigInstance.SupportedLanguages.Where(l => l != "en");
+            foreach (string language in supportedLanguages)
+            {
+                languageDtos.Add(language, (await AlteredAPIRequester.GetCards(language)).Members);
+            }
+
+            foreach (Card cardMissingLanguages in cardsMissingLanguages)
+            {
+                Card mutableCard = cardMissingLanguages;
+                foreach (string language in supportedLanguages)
+                {
+                    CardDTO dto = languageDtos[language].First(dto => dto.Reference == cardMissingLanguages.ID);
+                    FillLocalizedStrings(ref mutableCard, dto, language);
+                }
+
+                DatabaseProvider.Db.UpdateCard(cardMissingLanguages);
+            }
+
+            DatabaseProvider.Db.SaveChanges();
+            LogUtils.Log("Done updating languages.");
+        }
+        else
+        {
+            LogUtils.Log("No cards missing languages.");
+        }
     }
 
     // For simplicity's sake we're gonna assume no new rarities will be added. We can always go back and change that if needed.
@@ -71,11 +113,11 @@ public static class CardImportManager
         HashSet<string> existingFactionsIds = DatabaseProvider.Db.Factions.Select((faction => faction.ID)).ToHashSet();
         HashSet<string> existingTypesIds = DatabaseProvider.Db.Types.Select(type => type.ID).ToHashSet();
         HashSet<string> existingSetsIds = DatabaseProvider.Db.Sets.Select(set => set.ID).ToHashSet();
-        
+
         HashSet<Faction> factionsToCreate = new HashSet<Faction>();
         HashSet<CardType> typesToCreate = new HashSet<CardType>();
         HashSet<CardSet> setsToCreate = new HashSet<CardSet>();
-        
+
         dtos.ForEach(dto =>
         {
             // TODO: Move that to a generic method maybe ?
@@ -91,6 +133,7 @@ public static class CardImportManager
                     LogUtils.Log($"Adding new faction {dto.MainFaction.Reference}");
                 }
             }
+
             if (!existingSetsIds.Contains(dto.CardSet.Reference))
             {
                 bool added = setsToCreate.Add(new CardSet()
@@ -103,6 +146,7 @@ public static class CardImportManager
                     LogUtils.Log($"Adding new set {dto.CardSet.Reference}");
                 }
             }
+
             if (!existingTypesIds.Contains(dto.CardType.Reference))
             {
                 bool added = typesToCreate.Add(new CardType()
@@ -125,7 +169,7 @@ public static class CardImportManager
             await DatabaseProvider.Db.SaveChangesAsync();
         }
     }
-    
+
     // Create a card object from English values
     // Filling in other languages will be handled in a different method
     private static Card CreateCard(CardDTO dto, List<CardSet> sets, List<CardType> types, List<Rarity> rarities,
@@ -136,7 +180,7 @@ public static class CardImportManager
         LinkCardToRelatedEntities(ref card, dto, sets, types, rarities, factions);
         return card;
     }
-    
+
     private static Card CardSkeletonFromDTO(CardDTO dto)
     {
         Card result = new Card()
@@ -144,7 +188,10 @@ public static class CardImportManager
             ID = dto.Reference,
             LastUpdated = DateTime.Parse(dto.UpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind)
         };
-        if (dto.Elements.HandCost is int handCost && dto.Elements.RecallCost is int recallCost) // If one is specified, the other should be too. Using an or would not assign the second variable if the first one was present.
+        if (dto.Elements.HandCost is int handCost &&
+            dto.Elements
+                    .RecallCost is int
+                recallCost) // If one is specified, the other should be too. Using an or would not assign the second variable if the first one was present.
         {
             result.Costs = new Costs()
             {
@@ -152,7 +199,9 @@ public static class CardImportManager
                 Reserve = recallCost
             };
         }
-        if (dto.Elements.ForestPower is int forestPower && dto.Elements.MountainPower is int mountainPower && dto.Elements.OceanPower is int oceanPower)
+
+        if (dto.Elements.ForestPower is int forestPower && dto.Elements.MountainPower is int mountainPower &&
+            dto.Elements.OceanPower is int oceanPower)
         {
             result.Power = new Power()
             {
@@ -164,8 +213,9 @@ public static class CardImportManager
 
         return result;
     }
-    
-    private static Card LinkCardToRelatedEntities(ref Card card, CardDTO dto, List<CardSet> sets, List<CardType> types, List<Rarity> rarities, List<Faction> factions)
+
+    private static Card LinkCardToRelatedEntities(ref Card card, CardDTO dto, List<CardSet> sets, List<CardType> types,
+        List<Rarity> rarities, List<Faction> factions)
     {
         string mainFactionId = dto.Reference.Split('_')[3];
         card.Set = sets.First(set => set.ID == dto.CardSet.Reference);

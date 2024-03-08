@@ -85,26 +85,38 @@ public static class MessageCardNameHandler
             string cardName;
             string? rarity;
             string? faction;
+            string? language;
             string[] split = innerString.Split('|');
             cardName = split[0].Trim();
             if (split.Length == 1)
             {
                 rarity = null;
                 faction = null;
+                language = null;
             }
-            else if (split.Length == 2)
+            else if (split.Length == 2 || split.Length == 3)
             {
                 string options = split[1].Trim();
                 string[] optionsArray = options.Split(',');
                 rarity = optionsArray[0].Trim();
                 faction = optionsArray.Length > 1 ? optionsArray[1].Trim() : null;
+                if (split.Length == 3)
+                {
+                    language = split[2].Trim().ToLower();
+                }
+                else
+                {
+                    language = null;
+                }
             }
             else
             {
                 throw new InvalidQueryFormatException(innerString);
             }
 
-            Card foundCard = CardSearchManager.SearchCard(cardName, rarity, faction);
+            Tuple<string?, Card?> searchResult = CardSearchManager.SearchCard(cardName, rarity, faction, language);
+            string actualLanguage = searchResult.Item1;
+            Card foundCard = searchResult.Item2;
             if (foundCard is null)
             {
                 result = new EmbedBuilder().WithTitle("Not found")
@@ -115,7 +127,7 @@ public static class MessageCardNameHandler
             }
             else
             {
-                CardRecap recap = foundCard.ToCardRecap();
+                CardRecap recap = foundCard.ToCardRecap(actualLanguage);
                 result = CardRecapToEmbed(recap);
             }
         }
@@ -140,7 +152,7 @@ public static class MessageCardNameHandler
             .AddField("Rarity", recap.Rarity, true)
             .AddField("Set", recap.CardSet, true)
             .AddField("Current faction", recap.CurrentFaction, true);
-        
+
         if (recap.Rarity == "Rare")
         {
             builder = builder.WithColor(Color.Blue);

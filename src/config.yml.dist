@@ -1,5 +1,8 @@
 additional_languages: # English is already included
   - fr
+  - it
+  - de
+  - es
 big_image: false
 database: NauraaBot.db
 db_path:  ~

@@ -6,7 +6,10 @@ public static class Constants
 {
     public static readonly Dictionary<string, string> LanguageHttpCodes = new Dictionary<string, string>()
     {
-        {"en", "en-US"},
-        {"fr", "fr-FR"},
+        { "en", "en-US" },
+        { "fr", "fr-FR" },
+        { "it", "it-IT" },
+        { "de", "de-DE" },
+        { "es", "es-ES" }
     };
 }

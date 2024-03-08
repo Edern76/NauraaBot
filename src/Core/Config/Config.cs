@@ -15,12 +15,12 @@ public class Config
         set
         {
             _additionalLanguages = value;
-            SupportedLanguages = new HashSet<string>(_additionalLanguages);
-            SupportedLanguages.Add("en");
+            SupportedLanguages = new List<string>(_additionalLanguages);
+            SupportedLanguages.Insert(0, "en");
         }
     }
 
-    public HashSet<String> SupportedLanguages { get; private set; }
+    public List<String> SupportedLanguages { get; private set; }
     [YamlMember(Alias = "token")] public string Token { get; set; }
 
     [YamlMember(Alias = "big_image")] public bool BigImage { get; set; }
