@@ -14,7 +14,7 @@ In any channel on a server where the bot is present, summon it by typing
 {{Card Name}}
 ```
 
-This should be the **exact* name of the card you're looking for. Support for approximate search terms is planned for a future version.
+This should be the **exact** name of the card you're looking for. Support for approximate search terms is planned for a future version.
 
 You can also get the rare in faction version by typing :
 
