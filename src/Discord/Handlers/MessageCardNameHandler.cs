@@ -133,7 +133,6 @@ public static class MessageCardNameHandler
     private static Embed CardRecapToEmbed(CardRecap recap)
     {
         EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
-            .WithColor(Color.Blue)
             .WithUrl(recap.URL)
             .WithThumbnailUrl(recap.ImageURL)
             .WithDescription(recap.Effect)
@@ -141,6 +140,11 @@ public static class MessageCardNameHandler
             .AddField("Rarity", recap.Rarity, true)
             .AddField("Set", recap.CardSet, true)
             .AddField("Current faction", recap.CurrentFaction, true);
+        
+        if (recap.Rarity == "Rare")
+        {
+            builder = builder.WithColor(Color.Blue);
+        }
 
         if (ConfigProvider.ConfigInstance.BigImage)
         {

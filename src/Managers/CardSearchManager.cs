@@ -19,7 +19,14 @@ public static class CardSearchManager
         // TODO : Error check on invalid faction/rarity
         if (factionID is not null)
         {
-            potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID == factionID);
+            if (factionID == "OOF")
+            {
+                potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID != card.MainFaction.ID);
+            }
+            else
+            {
+                potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID == factionID);
+            }
         }
         else
         {
@@ -31,7 +38,14 @@ public static class CardSearchManager
         Card result;
         if (rarityShort is not null)
         {
-            result = potentialMatches.Find(card => card.Rarity.Short == rarityShort);
+            if (rarityShort == "P")
+            {
+                result = potentialMatches.Find(card => card.ID.Split("_")[2] == "P"); // See if there is a cleaner way to handle this
+            }
+            else
+            {
+                result = potentialMatches.Find(card => card.Rarity.Short == rarityShort);
+            }
         }
         else
         {
