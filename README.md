@@ -32,7 +32,7 @@ You can also specify the language in which to get the results in the case you ha
 ```
 {{Card Name||FR}}
 OR
-{{Card Name||R|FR}}
+{{Card Name|R|FR}}
 ```
 
 ## Requirements
