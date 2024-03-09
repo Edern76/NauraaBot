@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
+using NauraaBot.Managers.Utils;
 
 namespace NauraaBot.Managers;
 
@@ -38,7 +39,8 @@ public static class CardSearchManager
                      ConfigProvider.ConfigInstance.SupportedLanguages) // Ugly but we're gonna replace this soon anyways
             {
                 potentialMatches =
-                    allCards.FindAll(card => string.Equals(card.Names.Get(supportedLanguage), name, StringComparison.CurrentCultureIgnoreCase));
+                    allCards.FindAll(card => string.Equals(card.Names.Get(supportedLanguage), name,
+                        StringComparison.CurrentCultureIgnoreCase));
                 if (potentialMatches is not null && potentialMatches.Count > 0)
                 {
                     actualLanguage = supportedLanguage;
@@ -47,46 +49,8 @@ public static class CardSearchManager
             }
         }
 
-        // TODO : Error check on invalid faction/rarity
-        if (factionID is not null)
-        {
-            if (factionID == "OOF")
-            {
-                potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID != card.MainFaction.ID);
-            }
-            else
-            {
-                potentialMatches = potentialMatches.FindAll(card => card.CurrentFaction.ID == factionID);
-            }
-        }
-        else
-        {
-            potentialMatches =
-                potentialMatches.FindAll(card =>
-                    card.CurrentFaction.ID == card.MainFaction.ID); // Exclude out of factions
-        }
-
-        Card result;
-        if (rarityShort is not null && rarityShort.Length > 0)
-        {
-            if (rarityShort == "P")
-            {
-                result = potentialMatches.Find(card =>
-                    card.ID.Split("_")[2] == "P"); // See if there is a cleaner way to handle this
-            }
-            else
-            {
-                result = potentialMatches.Find(card => card.Rarity.Short == rarityShort);
-            }
-        }
-        else
-        {
-            result = potentialMatches.Find(card => card.Rarity.Short == "C"); // Default to common
-            if (result is null)
-            {
-                result = potentialMatches.FirstOrDefault(); // If no common is available we just take the first one
-            }
-        }
+        potentialMatches = CardFilter.FilterMatches(potentialMatches, rarityShort, factionID);
+        Card result = potentialMatches.FirstOrDefault();
 
         return new Tuple<string?, Card?>(actualLanguage, result);
     }
