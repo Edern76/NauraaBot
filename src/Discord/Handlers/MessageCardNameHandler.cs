@@ -9,6 +9,7 @@ using NauraaBot.Core.Exception;
 using NauraaBot.Core.Types;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
+using NauraaBot.Discord.Embeds;
 using NauraaBot.Managers;
 
 namespace NauraaBot.Discord.Handlers;
@@ -36,7 +37,7 @@ public static class MessageCardNameHandler
 
         try
         {
-            MatchCollection matches = Regex.Matches(message.Content, @"\{\{([^\}]+)\}\}");
+            MatchCollection matches = Regex.Matches(message.Content, @"\{\{([!]?)([^\}]+)\}\}");
             List<Embed> embedsToSend = new List<Embed>();
             foreach (Match match in matches)
             {
@@ -81,7 +82,8 @@ public static class MessageCardNameHandler
         Embed result;
         try
         {
-            string innerString = match.Groups[1].Value;
+            string innerString = match.Groups[2].Value;
+            string optionsString = match.Groups[1].Value;
             string cardName;
             string? rarity;
             string? faction;
@@ -114,7 +116,7 @@ public static class MessageCardNameHandler
                 throw new InvalidQueryFormatException(innerString);
             }
 
-            Tuple<string?, Card?> searchResult = CardSearchManager.SearchCard(cardName, rarity, faction, language);
+            Tuple<string?, Card?> searchResult = HandleCardName(cardName, rarity, faction, language);
             string actualLanguage = searchResult.Item1;
             Card foundCard = searchResult.Item2;
             if (foundCard is null)
@@ -128,7 +130,7 @@ public static class MessageCardNameHandler
             else
             {
                 CardRecap recap = foundCard.ToCardRecap(actualLanguage);
-                result = CardRecapToEmbed(recap);
+                result = CardRecapToEmbed(recap, optionsString);
             }
         }
         catch (InvalidQueryFormatException iqfe)
@@ -142,37 +144,33 @@ public static class MessageCardNameHandler
         return result;
     }
 
-    private static Embed CardRecapToEmbed(CardRecap recap)
+    private static Tuple<string, Card> HandleCardName(string expression, string? rarity, string? faction,
+        string? language)
     {
-        EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
-            .WithUrl(recap.URL)
-            .WithThumbnailUrl(recap.ImageURL)
-            .WithDescription(recap.Effect)
-            .AddField("Type", recap.CardType, true)
-            .AddField("Rarity", recap.Rarity, true)
-            .AddField("Set", recap.CardSet, true)
-            .AddField("Current faction", recap.CurrentFaction, true);
-
-        if (recap.Rarity == "Rare")
+        Tuple<string, Card> result;
+        switch (expression.ToLower())
         {
-            builder = builder.WithColor(Color.Blue);
+            case "rand()":
+                //TODO : Implement random card search
+                throw new NotImplementedException();
+                break;
+            default:
+                result = CardSearchManager.SearchCard(expression, rarity, faction, language);
+                break;
         }
 
-        if (ConfigProvider.ConfigInstance.BigImage)
-        {
-            builder = builder.WithImageUrl(recap.ImageURL);
-        }
+        return result;
+    }
 
-        if (recap.CostString is not null)
+    private static Embed CardRecapToEmbed(CardRecap recap, string optionsString = "")
+    {
+        if (optionsString.Contains('!'))
         {
-            builder = builder.AddField("Cost", recap.CostString, true);
+            return ImageCardEmbedBuilder.BuildEmbed(recap);
         }
-
-        if (recap.PowerString is not null)
+        else
         {
-            builder = builder.AddField("Power", recap.PowerString, true);
+            return FullCardEmbedBuilder.BuildEmbed(recap);
         }
-
-        return builder.Build();
     }
 }
