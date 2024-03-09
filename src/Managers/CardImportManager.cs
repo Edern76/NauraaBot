@@ -229,6 +229,7 @@ public static class CardImportManager
     private static void FillLocalizedStrings(ref Card card, CardDTO dto, string language)
     {
         card.Effect.Set(language, dto.Elements.MainEffect);
+        card.DiscardEffect.Set(language, dto.Elements.DiscardEffect);
         card.Names.Set(language, dto.Name);
         card.ImagesURLs.Set(language, dto.ImagePath);
     }

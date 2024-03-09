@@ -22,6 +22,7 @@ public class Card
     public LocalizedString ImagesURLs { get; set; } = new LocalizedString();
     public LocalizedString Names { get; set; } = new LocalizedString();
     public LocalizedString Effect { get; set; } = new LocalizedString();
+    public LocalizedString DiscardEffect { get; set; } = new LocalizedString();
     public Costs? Costs { get; set; }
     public Power? Power { get; set; }
 
@@ -33,7 +34,18 @@ public class Card
         string rarity = this.Rarity.Name;
         string cardSet = this.Set.Name;
         string currentFaction = this.CurrentFaction.Name;
-        string effect = this.Effect.Get(language);
+        List<String> effects = new List<string>();
+        if (this.Effect.Get(language) is string mainEffect && mainEffect.Length > 0)
+        {
+            effects.Add(mainEffect);
+        }
+
+        if (this.DiscardEffect.Get(language) is string discardEffect && discardEffect.Length > 0)
+        {
+            effects.Add(discardEffect);
+        }
+
+        string effect = String.Join(effects.Count > 0 ? "\n\n" : "\n", effects);
         string URL = $"https://altered.gg/{Constants.LanguageHttpCodes[language.ToLower()].ToLower()}/cards/{this.ID}";
         CardRecap recap = new CardRecap()
         {
@@ -62,7 +74,7 @@ public class Card
     public HashSet<string> GetMissingLanguages()
     {
         return new HashSet<string>(
-            (ImagesURLs.GetMissingLanguages().Union(Names.GetMissingLanguages())).Union(Effect.GetMissingLanguages()));
+            (ImagesURLs.GetMissingLanguages().Union(Names.GetMissingLanguages())));
     }
 }
 
