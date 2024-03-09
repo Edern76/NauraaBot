@@ -151,8 +151,7 @@ public static class MessageCardNameHandler
         switch (expression.ToLower())
         {
             case "rand()":
-                //TODO : Implement random card search
-                throw new NotImplementedException();
+                result = CardRandomManager.RandomCard(expression, rarity, faction, language);
                 break;
             default:
                 result = CardSearchManager.SearchCard(expression, rarity, faction, language);
