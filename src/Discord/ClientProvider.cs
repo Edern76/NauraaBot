@@ -23,6 +23,7 @@ public static class ClientProvider
 
         Client.Log += DiscordLogHandler.LogDiscordMessage;
         Client.MessageReceived += MessageCardNameHandler.HandleNameSearchOnMessageReceived;
+        Client.ReactionAdded += MessageDeleteReactionHandler.HandleDeleteRequestOnReactionAdded;
 
         await Client.LoginAsync(TokenType.Bot, token);
         await Client.StartAsync();
