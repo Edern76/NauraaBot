@@ -102,6 +102,12 @@ public static class MessageCardNameHandler
                 string[] optionsArray = options.Split(',');
                 rarity = optionsArray[0].Trim();
                 faction = optionsArray.Length > 1 ? optionsArray[1].Trim() : null;
+                if (faction is null && string.Equals(rarity.ToUpper(), "OOF", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    rarity = "R";
+                    faction = "OOF";
+                }
+
                 if (split.Length == 3)
                 {
                     language = split[2].Trim().ToLower();
