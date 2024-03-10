@@ -8,13 +8,12 @@ Add it to your Discord server by clicking [this link](https://discord.com/oauth2
 
 ## Usage
 
+### Basic usage
 In any channel on a server where the bot is present, summon it by typing
 
 ```
 {{Card Name}}
 ```
-
-This should be the **exact** name of the card you're looking for. Support for approximate search terms is planned for a future version.
 
 You can also get the rare in faction version by typing :
 
@@ -25,6 +24,8 @@ You can also get the rare in faction version by typing :
 And the out of faction one with :
 
 ```
+{{Card Name|OOF}}
+OR
 {{Card Name|R, OOF}}
 ```
 
@@ -35,6 +36,12 @@ OR
 {{Card Name|R|FR}}
 ```
 
+Prefixing `!` before the card name will get you the full card image in the reply instead of the details in text form.
+
+### Random card fetching
+
+You can get a random card by replacing the card's name in your query by `rand()`. All search parameters work with this. For instance, `{{rand()|C,MU|FR}}` will get a random French Muna common.
+
 ## Requirements
 
 - .NET 6 (SDK and runtime)
@@ -42,11 +49,8 @@ OR
 
 ## Planned features
 
-- Support for approximate search terms
 - Message throttling per user
 - Faction emojis
-- Ability to see only a picture of the card by prefixing the card name with `!`
-- Abilty to get a random card
 - And more
 
 ## Compiling
