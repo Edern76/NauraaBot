@@ -19,7 +19,7 @@ namespace NauraaBot
     {
         static async Task Main(string[] args)
         {
-            ;
+            LogUtils.Debug("This is a CI test please remove me from any code that will be pushed to the main branch");
             ConfigProvider.LoadConfig();
             DatabaseProvider.InitializeDatabase();
             await SchedulerProvider.InitializeScheduler();
