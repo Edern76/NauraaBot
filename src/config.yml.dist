@@ -9,5 +9,8 @@ db_path:  ~
 force_update_db_on_start: false
 max_replies_per_message: 5
 password: ~
+search:
+  max_absolute_distance: 5
+  max_relative_distance: 0.3
 update_periodicity: 0 0 0 1/1 * ? *
 token: placeholder

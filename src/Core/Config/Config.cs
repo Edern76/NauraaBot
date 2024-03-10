@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NauraaBot.Core.Config.Types;
 using YamlDotNet.Serialization;
 
 namespace NauraaBot.Core.Config;
@@ -37,4 +38,6 @@ public class Config
 
     [YamlMember(Alias = "update_periodicity")]
     public string UpdatePeriodicity { get; set; }
+
+    [YamlMember(Alias = "search")] public SearchConfig SearchConfig { get; set; }
 }

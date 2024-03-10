@@ -1,0 +1,33 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+      - ci-test
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '6.0'
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build in Release mode
+      run: dotnet build --configuration Release
+
+    - name: Check build status
+      run: |
+        if [ $? -ne 0 ]; then
+          echo "Build failed!"
+          exit 1
+        fi

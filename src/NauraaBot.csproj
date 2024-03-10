@@ -29,6 +29,7 @@
         <PackageReference Include="Quartz" Version="3.8.1"/>
         <PackageReference Include="Quartz.Jobs" Version="3.8.1"/>
         <PackageReference Include="Quartz.Serialization.Json" Version="3.8.1"/>
+        <PackageReference Include="Quickenshtein" Version="1.5.1"/>
         <PackageReference Include="RestSharp" Version="110.2.0"/>
         <PackageReference Include="YamlDotNet.NetCore" Version="1.0.0"/>
     </ItemGroup>

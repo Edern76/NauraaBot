@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Config;
+using Quickenshtein;
 
 namespace NauraaBot.Core.Utils;
 
@@ -13,7 +16,7 @@ public class LocalizedString
     public string de { get; set; }
     public string es { get; set; }
     public string it { get; set; }
-    
+
     // Using reflection would be cleaner but VERY slow, especially considering we're gonna do this for each card
     public Dictionary<string, string> ToDictionary()
     {
@@ -26,7 +29,7 @@ public class LocalizedString
             { "it", it }
         };
     }
-    
+
     // Ugly but again reflection is VERY slow
     public void Set(string lang, string value)
     {
@@ -51,7 +54,7 @@ public class LocalizedString
                 throw new NotSupportedException($"Language {lang} is not supported.");
         }
     }
-    
+
     // Same as above. Also avoids having to create a dictionary when we don't need one.
     public string Get(string lang)
     {
@@ -87,4 +90,55 @@ public class LocalizedString
 
         return result;
     }
+
+    public List<LevenshteinResult> GetLevenshteinDistances(string searchQuery, bool handleHero = false,
+        string? language = null)
+    {
+        List<LevenshteinResult> results = new List<LevenshteinResult>();
+        List<string> languages = language is not null
+            ? new List<string>() { language }
+            : ConfigProvider.ConfigInstance.SupportedLanguages;
+        foreach (string lang in languages)
+        {
+            int distance;
+            string value = Get(lang);
+            if (handleHero)
+            {
+                string[] splitValue = value.Split(' ');
+                if (splitValue.Length == 3)
+                {
+                    distance = new[]
+                    {
+                        Levenshtein.GetDistance(searchQuery, splitValue[0].Trim()),
+                        Levenshtein.GetDistance(searchQuery, splitValue[2].Trim()),
+                        Levenshtein.GetDistance(searchQuery, value)
+                    }.Min();
+                }
+                else
+                {
+                    distance = Levenshtein.GetDistance(searchQuery, value);
+                }
+            }
+            else
+            {
+                distance = Levenshtein.GetDistance(searchQuery, value);
+            }
+
+            results.Add(new LevenshteinResult
+            {
+                Language = lang,
+                Name = value,
+                Distance = distance
+            });
+        }
+
+        return results;
+    }
+}
+
+public class LevenshteinResult
+{
+    public string Language { get; set; }
+    public string Name { get; set; }
+    public int Distance { get; set; }
 }

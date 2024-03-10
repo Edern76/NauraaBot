@@ -26,32 +26,60 @@ public static class CardSearchManager
         List<Card> allCards = DatabaseProvider.Db.Cards.Include(card => card.CurrentFaction)
             .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
             .Include(card => card.Type).ToList();
-        List<Card> potentialMatches = null;
-        string? actualLanguage = language;
-        if (language is not null)
-        {
-            potentialMatches = allCards.FindAll(card =>
-                string.Equals(card.Names.Get(language), name, StringComparison.CurrentCultureIgnoreCase));
-        }
-        else
-        {
-            foreach (string supportedLanguage in
-                     ConfigProvider.ConfigInstance.SupportedLanguages) // Ugly but we're gonna replace this soon anyways
-            {
-                potentialMatches =
-                    allCards.FindAll(card => string.Equals(card.Names.Get(supportedLanguage), name,
-                        StringComparison.CurrentCultureIgnoreCase));
-                if (potentialMatches is not null && potentialMatches.Count > 0)
-                {
-                    actualLanguage = supportedLanguage;
-                    break;
-                }
-            }
-        }
+        Tuple<string, List<Card>> nameSearchResult = GetPotentialMatches(allCards, name, language);
+
+        string actualLanguage = nameSearchResult.Item1;
+        List<Card> potentialMatches = nameSearchResult.Item2;
 
         potentialMatches = CardFilter.FilterMatches(potentialMatches, rarityShort, factionID);
         Card result = potentialMatches.FirstOrDefault();
 
         return new Tuple<string?, Card?>(actualLanguage, result);
+    }
+
+    public static Tuple<string, List<Card>> GetPotentialMatches(List<Card> cards, string name, string? language = null)
+    {
+        IEnumerable<LevenshteinResult> distances =
+            cards.SelectMany(c => c.Names.GetLevenshteinDistances(name,
+                string.Equals(c.Type.ID.ToUpper(), "HERO", StringComparison.CurrentCultureIgnoreCase), language));
+        LevenshteinResult bestMatch = distances.OrderBy(d => d.Distance).FirstOrDefault(d =>
+            (double)d.Distance / d.Name.Length <= ConfigProvider.ConfigInstance.SearchConfig.MaxRelativeDistance);
+        if (bestMatch is null)
+        {
+            return new Tuple<string, List<Card>>("en", new List<Card>());
+        }
+
+        if (language is null)
+        {
+            IEnumerable<LevenshteinResult> equalDists = distances.Where(d => d.Distance == bestMatch.Distance);
+            if (equalDists.FirstOrDefault(d => d.Language == "en") is LevenshteinResult englishResult)
+            {
+                bestMatch = englishResult;
+            }
+        }
+
+        double relativeDistance =
+            bestMatch.Name.Length > 0 ? (double)bestMatch.Distance / bestMatch.Name.Length : 999.9;
+        if (bestMatch.Name.Length == 0 ||
+            bestMatch.Distance > ConfigProvider.ConfigInstance.SearchConfig.MaxAbsoluteDistance ||
+            (double)bestMatch.Distance / bestMatch.Name.Length >
+            ConfigProvider.ConfigInstance.SearchConfig.MaxRelativeDistance)
+        {
+            return new Tuple<string, List<Card>>("en", new List<Card>());
+        }
+        else
+        {
+            List<Card> potentialMatches = cards.FindAll(c => string.Equals(c.Names.Get(bestMatch.Language),
+                bestMatch.Name, StringComparison.CurrentCultureIgnoreCase));
+            if (potentialMatches.Any(c =>
+                    !string.Equals(c.Type.ID.ToUpper(), "HERO", StringComparison.CurrentCultureIgnoreCase)))
+            {
+                potentialMatches = potentialMatches.FindAll(c => !string.Equals(c.Type.ID.ToUpper(), "HERO",
+                    StringComparison
+                        .CurrentCultureIgnoreCase)); // Handles the case where part of the hero card name is another card's name (ex: "Kojo & Booda" and "Booda")
+            }
+
+            return new Tuple<string, List<Card>>(bestMatch.Language, potentialMatches);
+        }
     }
 }
