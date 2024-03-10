@@ -20,7 +20,7 @@ jobs:
         dotnet-version: '6.0'
 
     - name: Restore dependencies
-      run: dotnet src restore
+      run: dotnet restore src
 
     - name: Build in Release mode
       run: dotnet build src --configuration Release
