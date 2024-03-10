@@ -19,7 +19,6 @@ namespace NauraaBot
     {
         static async Task Main(string[] args)
         {
-            ;
             ConfigProvider.LoadConfig();
             DatabaseProvider.InitializeDatabase();
             await SchedulerProvider.InitializeScheduler();
