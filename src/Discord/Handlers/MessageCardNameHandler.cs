@@ -37,7 +37,7 @@ public static class MessageCardNameHandler
 
         try
         {
-            MatchCollection matches = Regex.Matches(message.Content, @"\{\{([!]?)([^\}]+)\}\}");
+            MatchCollection matches = Regex.Matches(message.Content, @"\{\{((?:[!@]?(?:U:)?)?)([^\}]+)\}\}");
             List<Embed> embedsToSend = new List<Embed>();
             foreach (Match match in matches)
             {
@@ -102,7 +102,8 @@ public static class MessageCardNameHandler
                 string[] optionsArray = options.Split(',');
                 rarity = optionsArray[0].Trim();
                 faction = optionsArray.Length > 1 ? optionsArray[1].Trim() : null;
-                if (faction is null && string.Equals(rarity.ToUpper(), "OOF", StringComparison.CurrentCultureIgnoreCase))
+                if (faction is null &&
+                    string.Equals(rarity.ToUpper(), "OOF", StringComparison.CurrentCultureIgnoreCase))
                 {
                     rarity = "R";
                     faction = "OOF";
@@ -172,6 +173,10 @@ public static class MessageCardNameHandler
         if (optionsString.Contains('!'))
         {
             return ImageCardEmbedBuilder.BuildEmbed(recap);
+        }
+        else if (optionsString.Contains('@'))
+        {
+            return CardLocalizationsEmbedBuilder.BuildEmbed(recap);
         }
         else
         {

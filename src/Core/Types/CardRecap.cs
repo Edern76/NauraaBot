@@ -1,10 +1,13 @@
-﻿namespace NauraaBot.Core.Types;
+﻿using NauraaBot.Core.Utils;
+
+namespace NauraaBot.Core.Types;
 
 public class CardRecap
 {
     public string URL { get; set; }
     public string ImageURL { get; set; }
     public string Name { get; set; }
+    public LocalizedString AllNames { get; set; }
     public string CardType { get; set; }
     public string Rarity { get; set; }
     public string CurrentFaction { get; set; }

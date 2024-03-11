@@ -49,6 +49,7 @@ public class Card
         string URL = $"https://altered.gg/{Constants.LanguageHttpCodes[language.ToLower()].ToLower()}/cards/{this.ID}";
         CardRecap recap = new CardRecap()
         {
+            AllNames = this.Names,
             Name = name,
             URL = URL,
             ImageURL = imageUrl,
