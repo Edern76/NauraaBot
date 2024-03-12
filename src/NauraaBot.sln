@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NauraaBot", "NauraaBot.csproj", "{B7816E1B-4B19-4A9E-AF9F-E674816F5D22}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NauraaBot.Tests", "..\test\NauraaBot.Tests.csproj", "{FB4518EC-884E-4914-94F5-2B8B18F43112}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{B7816E1B-4B19-4A9E-AF9F-E674816F5D22}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B7816E1B-4B19-4A9E-AF9F-E674816F5D22}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B7816E1B-4B19-4A9E-AF9F-E674816F5D22}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FB4518EC-884E-4914-94F5-2B8B18F43112}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FB4518EC-884E-4914-94F5-2B8B18F43112}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FB4518EC-884E-4914-94F5-2B8B18F43112}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FB4518EC-884E-4914-94F5-2B8B18F43112}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

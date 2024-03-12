@@ -10,7 +10,7 @@ namespace NauraaBot.Managers;
 
 public static class CardRandomManager
 {
-    public static Tuple<string, Card> RandomCard(string name, string? rarityShort, string? factionID,
+    public static Tuple<string, Card?> RandomCard(string name, string? rarityShort, string? factionID,
         string? language = null)
     {
         if (language is null || language.Length == 0)
@@ -23,6 +23,10 @@ public static class CardRandomManager
             .Include(card => card.Type).ToList();
         List<Card> filteredCards = CardFilter.FilterMatches(allCards, rarityShort, factionID);
 
+        if (filteredCards.Count == 0)
+        {
+            return new Tuple<string, Card>("en", null);
+        }
         Card foundCard = filteredCards[RandomProvider.Random.Next(filteredCards.Count)];
         return new Tuple<string, Card>(language, foundCard);
     }

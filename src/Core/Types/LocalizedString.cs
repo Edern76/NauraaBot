@@ -91,20 +91,29 @@ public class LocalizedString
         return result;
     }
 
+    // Oh man this is pretty ugly
+    // But it works
+    // Kinda
     public List<LevenshteinResult> GetLevenshteinDistances(string searchQuery, bool handleHero = false,
         string? language = null)
     {
+        searchQuery = StringUtils.ReplaceSpecialCharacters(searchQuery);
         List<LevenshteinResult> results = new List<LevenshteinResult>();
         List<string> languages = language is not null
             ? new List<string>() { language }
             : ConfigProvider.ConfigInstance.SupportedLanguages;
+        string[] splitSearch = searchQuery.Split(' ');
         foreach (string lang in languages)
         {
             int distance;
-            string value = Get(lang);
+            string actualName = Get(lang);
+            string value = StringUtils.ReplaceSpecialCharacters(actualName);
+
+            string[] splitValue = value.Split(' ');
+
+            //TODO: Relative distance for each case
             if (handleHero)
             {
-                string[] splitValue = value.Split(' ');
                 if (splitValue.Length == 3)
                 {
                     distance = new[]
@@ -119,6 +128,28 @@ public class LocalizedString
                     distance = Levenshtein.GetDistance(searchQuery, value);
                 }
             }
+            else if (splitSearch.Length < splitValue.Length)
+            {
+                string[] groups = StringUtils.SplitIntoGroups(splitValue, splitSearch.Length);
+
+                List<int> distanceList =
+                    groups.Select(g =>
+                        {
+                            if (g.Split(" ")
+                                .Any(word =>
+                                    splitValue.Contains(
+                                        word))) // Avoids outlandish suggestion, might need to change it though
+                            {
+                                int dist = Levenshtein.GetDistance(searchQuery, g) + 2; // +2 to favorise exact matches
+                                return dist;
+                            }
+
+                            return 999999;
+                        })
+                        .ToList();
+                distanceList.Add(Levenshtein.GetDistance(searchQuery, value));
+                distance = distanceList.Min();
+            }
             else
             {
                 distance = Levenshtein.GetDistance(searchQuery, value);
@@ -127,7 +158,7 @@ public class LocalizedString
             results.Add(new LevenshteinResult
             {
                 Language = lang,
-                Name = value,
+                Name = actualName,
                 Distance = distance
             });
         }

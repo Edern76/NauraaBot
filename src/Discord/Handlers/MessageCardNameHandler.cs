@@ -151,10 +151,10 @@ public static class MessageCardNameHandler
         return result;
     }
 
-    private static Tuple<string, Card> HandleCardName(string expression, string? rarity, string? faction,
+    private static Tuple<string, Card?> HandleCardName(string expression, string? rarity, string? faction,
         string? language)
     {
-        Tuple<string, Card> result;
+        Tuple<string, Card?> result;
         switch (expression.ToLower())
         {
             case "rand()":

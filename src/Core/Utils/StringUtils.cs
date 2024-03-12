@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace NauraaBot.Core.Utils;
 
@@ -23,6 +24,23 @@ public static class StringUtils
         { "\u00E7", "ç" }, // French letter with cedilla (ç)
     };
 
+    private static readonly Dictionary<string, string> SpecialCharReplacementMap = new Dictionary<string, string>()
+    {
+        { ",", "" },
+        { "-", " " },
+        { "é", "e" },
+        { "è", "e" },
+        { "à", "a" },
+        { "â", "a" },
+        { "ê", "e" },
+        { "î", "i" },
+        { "ô", "o" },
+        { "û", "u" },
+        { "ü", "u" },
+        { "ç", "c" },
+        { "ß", "ss" },
+    };
+
     public static string Decode(string input)
     {
         foreach (var (key, value) in EncodingCharMap)
@@ -31,5 +49,31 @@ public static class StringUtils
         }
 
         return input;
+    }
+
+    public static string ReplaceSpecialCharacters(string input)
+    {
+        foreach (var (key, value) in SpecialCharReplacementMap)
+        {
+            input = input.Replace(key, value);
+        }
+
+        return input;
+    }
+
+    public static string[] SplitIntoGroups(string[] input, int groupSize)
+    {
+        IEnumerable<string> splitString = input.Select(s => s.Replace(",", "").Trim());
+        IEnumerable<string> enumerable = splitString as string[] ?? splitString.ToArray(); // Avoid multiple enumeration
+        if (enumerable.Count() < groupSize)
+        {
+            return new string[] { string.Join(" ", input) };
+        }
+        else
+        {
+            return Enumerable.Range(0, enumerable.Count() - groupSize + 1)
+                .Select(i => string.Join(" ", splitString.Skip(i).Take(groupSize)))
+                .ToArray();
+        }
     }
 }
