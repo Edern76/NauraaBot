@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
@@ -82,6 +83,7 @@ public static class MessageCardNameHandler
         Embed result;
         try
         {
+            List<string> errors = new List<string>();
             string innerString = match.Groups[2].Value;
             string optionsString = match.Groups[1].Value;
             string cardName;
@@ -109,6 +111,11 @@ public static class MessageCardNameHandler
                     faction = "OOF";
                 }
 
+                if (rarity is not null && rarity.Trim().Length == 0)
+                {
+                    rarity = null;
+                }
+
                 if (split.Length == 3)
                 {
                     language = split[2].Trim().ToLower();
@@ -121,6 +128,18 @@ public static class MessageCardNameHandler
             else
             {
                 throw new InvalidQueryFormatException(innerString);
+            }
+
+            List<string> paramErrors = ParamsCheckerManager.GetParamErrors(faction, rarity, language);
+            if (paramErrors.Count > 0)
+            {
+                string errorString = string.Join("\n", paramErrors.Select(s => $"- {s}"));
+                result = new EmbedBuilder()
+                    .WithTitle("The following errors have been encountered in the supplied parameters")
+                    .WithDescription(errorString)
+                    .WithColor(Color.Orange)
+                    .Build();
+                return result;
             }
 
             Tuple<string?, Card?> searchResult = HandleCardName(cardName, rarity, faction, language);
