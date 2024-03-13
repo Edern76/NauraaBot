@@ -27,6 +27,7 @@ public static class StringUtils
     private static readonly Dictionary<string, string> SpecialCharReplacementMap = new Dictionary<string, string>()
     {
         { ",", "" },
+        { "!", "" },
         { "-", " " },
         { "é", "e" },
         { "è", "e" },

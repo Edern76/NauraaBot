@@ -97,7 +97,7 @@ public class LocalizedString
     public List<LevenshteinResult> GetLevenshteinDistances(string searchQuery, bool handleHero = false,
         string? language = null)
     {
-        searchQuery = StringUtils.ReplaceSpecialCharacters(searchQuery);
+        searchQuery = StringUtils.ReplaceSpecialCharacters(searchQuery).Trim().ToLower();
         List<LevenshteinResult> results = new List<LevenshteinResult>();
         List<string> languages = language is not null
             ? new List<string>() { language }
@@ -107,7 +107,7 @@ public class LocalizedString
         {
             int distance;
             string actualName = Get(lang);
-            string value = StringUtils.ReplaceSpecialCharacters(actualName);
+            string value = StringUtils.ReplaceSpecialCharacters(actualName).Trim().ToLower();
 
             string[] splitValue = value.Split(' ');
 
