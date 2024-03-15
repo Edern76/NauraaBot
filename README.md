@@ -38,6 +38,8 @@ OR
 
 Prefixing `!` before the card name will get you the full card image in the reply instead of the details in text form.
 
+Prefixing `@` before the card name will show you the card name in all supported languages.
+
 ### Random card fetching
 
 You can get a random card by replacing the card's name in your query by `rand()`. All search parameters work with this. For instance, `{{rand()|C,MU|FR}}` will get a random French Muna common.

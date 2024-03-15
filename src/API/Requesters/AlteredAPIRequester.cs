@@ -34,7 +34,7 @@ public static class AlteredAPIRequester
         LogUtils.Log($"Using language code {languageHttpCode} for request to Altered API.");
         request.AddHeader("Accept-Language", languageHttpCode);
         request.AddHeader("User-Agent",
-            "NauraaBot/0.3.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+            "NauraaBot/0..0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
         request.AddHeader("Accept", "*/*");
         request.AddParameter("pagination", "false");
         RestResponse response = await _client.ExecuteGetAsync(request);
