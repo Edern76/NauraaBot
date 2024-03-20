@@ -34,23 +34,17 @@ public static class CardImportManager
 
         foreach (CardDTO dto in dtos)
         {
-            // TODO : Store last update time in database and use that to find updated cards instead of checking each card
-            if (!existingCardsIds.Contains(dto.Reference) ||
-                existingCards.First(card => card.ID == dto.Reference).LastUpdated < DateTime.Parse(dto.UpdatedAt, null,
-                    System.Globalization.DateTimeStyles.RoundtripKind))
+            Card card = CreateCard(dto, sets, types, rarities, factions);
+            if (!existingCardsIds.Contains(card.ID))
             {
-                Card card = CreateCard(dto, sets, types, rarities, factions);
-                if (!existingCardsIds.Contains(card.ID))
-                {
-                    DatabaseProvider.Db.Add(card);
-                }
-                else
-                {
-                    DatabaseProvider.Db.UpdateCard(card);
-                }
-
-                cardsImported++;
+                DatabaseProvider.Db.Add(card);
             }
+            else
+            {
+                DatabaseProvider.Db.UpdateCard(card);
+            }
+
+            cardsImported++;
         }
 
         if (cardsImported > 0)
@@ -120,6 +114,17 @@ public static class CardImportManager
 
         dtos.ForEach(dto =>
         {
+            if (dto.CardSet is null)
+            {
+                string setID = dto.Reference.Split('_')[1];
+                dto.CardSet = new IDNameObject()
+                {
+                    Reference = setID,
+                    Name = setID,
+                    Type = "Set",
+                };
+            }
+
             // TODO: Move that to a generic method maybe ?
             if (!existingFactionsIds.Contains(dto.MainFaction.Reference))
             {
@@ -186,8 +191,12 @@ public static class CardImportManager
         Card result = new Card()
         {
             ID = dto.Reference,
-            LastUpdated = DateTime.Parse(dto.UpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind)
         };
+        if (dto.UpdatedAt is not null)
+        {
+            result.LastUpdated = DateTime.Parse(dto.UpdatedAt, null, System.Globalization.DateTimeStyles.RoundtripKind);
+        }
+
         if (dto.Elements.HandCost is int handCost &&
             dto.Elements
                     .RecallCost is int
@@ -217,6 +226,17 @@ public static class CardImportManager
     private static Card LinkCardToRelatedEntities(ref Card card, CardDTO dto, List<CardSet> sets, List<CardType> types,
         List<Rarity> rarities, List<Faction> factions)
     {
+        if (dto.CardSet is null)
+        {
+            string setID = dto.Reference.Split('_')[1];
+            dto.CardSet = new IDNameObject()
+            {
+                Reference = setID,
+                Name = setID,
+                Type = "Set",
+            };
+        }
+
         string mainFactionId = dto.Reference.Split('_')[3];
         card.Set = sets.First(set => set.ID == dto.CardSet.Reference);
         card.Rarity = rarities.First(rarity => rarity.ID == dto.Rarity.Reference);
