@@ -30,7 +30,7 @@ namespace NauraaBot
             }
 
             ScheduleUpdateJob();
-
+            EmoteProvider.InitializeEmotes();
             await ClientProvider.InitializeClient(ConfigProvider.ConfigInstance.Token);
 
             AppDomain.CurrentDomain.ProcessExit += OnProcessExit;

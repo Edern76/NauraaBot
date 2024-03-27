@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace NauraaBot.Core.Utils;
@@ -76,5 +78,20 @@ public static class StringUtils
                 .Select(i => string.Join(" ", splitString.Skip(i).Take(groupSize)))
                 .ToArray();
         }
+    }
+
+    public static string CombinePaths(string path1, params string[] paths)
+    {
+        if (path1 == null)
+        {
+            throw new ArgumentNullException("path1");
+        }
+
+        if (paths == null)
+        {
+            throw new ArgumentNullException("paths");
+        }
+
+        return paths.Aggregate(path1, (acc, p) => Path.Combine(acc, p));
     }
 }

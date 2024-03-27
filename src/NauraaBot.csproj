@@ -13,6 +13,10 @@
         <None Update="config.yml.dist">
             <CopyToOutputDirectory>Never</CopyToOutputDirectory>
         </None>
+        <Content Include="..\resources\**\*.*">
+            <Link>resources\%(RecursiveDir)%(Filename)%(Extension)</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
     </ItemGroup>
 
     <ItemGroup>

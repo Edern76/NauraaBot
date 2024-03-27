@@ -1,0 +1,32 @@
+[
+	{
+		"name": "Axiom",
+		"replaces": "Axiom",
+		"code": "<:axiom:1222491761918869574>"
+	},
+	{
+		"name": "Bravos",
+		"replaces": "Bravos",
+		"code": "<:bravos:1222491760127643669>"
+	},
+	{
+		"name": "Lyra",
+		"replaces": "Lyra",
+		"code": "<:lyra:1222491758655443034>"
+	},
+	{
+		"name": "Muna",
+		"replaces": "Muna",
+		"code": "<:muna:1222491755618893897>"
+	},
+	{
+		"name": "Ordis",
+		"replaces": "Ordis",
+		"code": "<:ordis:1222491754532700250>"
+	},
+	{
+		"name": "Yzmir",
+		"replaces": "Yzmir",
+		"code": "<:yzmir:1222491752552857620>"
+	}
+]

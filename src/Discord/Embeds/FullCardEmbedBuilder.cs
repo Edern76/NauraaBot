@@ -1,6 +1,7 @@
 ﻿using Discord;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Types;
+using NauraaBot.Discord.Types.Emote;
 
 namespace NauraaBot.Discord.Embeds;
 
@@ -8,6 +9,13 @@ public class FullCardEmbedBuilder : ICardEmbedBuilder
 {
     public static Embed BuildEmbed(CardRecap recap)
     {
+        string currentFaction = recap.CurrentFaction;
+        if (EmoteProvider.Factions.Find(emote => emote.Replaces.ToLower() == currentFaction.ToLower()) is EmoteInfo
+            factionEmote)
+        {
+            currentFaction = factionEmote.Code;
+        }
+
         EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
             .WithUrl(recap.URL)
             .WithThumbnailUrl(recap.ImageURL)
@@ -15,7 +23,7 @@ public class FullCardEmbedBuilder : ICardEmbedBuilder
             .AddField("Type", recap.CardType, true)
             .AddField("Rarity", recap.Rarity, true)
             .AddField("Set", recap.CardSet, true)
-            .AddField("Current faction", recap.CurrentFaction, true);
+            .AddField("Current faction", currentFaction, true);
 
         if (recap.Rarity == "Rare")
         {
