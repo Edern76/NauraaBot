@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
@@ -23,26 +24,27 @@ public class DatabaseContext : DbContext
         {
             this.Entry(existingCard).State = EntityState.Detached;
         }
+
         this.Update(card);
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Faction>().HasData(new Faction { ID="AX", Name="Axiom" }, 
-            new Faction{ID="BR", Name="Bravos"}, 
-            new Faction{ID="LY", Name="Lyra"}, 
-            new Faction{ID="MU", Name="Muna"},
-            new Faction{ID="OR", Name="Ordis"},
-            new Faction{ID="YZ", Name="Yzmir"}
-            );
-        modelBuilder.Entity<Rarity>().HasData(new Rarity{ID="COMMON", Name="Common", Short="C"}, 
-            new Rarity{ID="RARE", Name="Rare", Short="R"}, 
-            new Rarity{ID="UNIQUE", Name="Unique", Short="U"}
-            );
-        modelBuilder.Entity<CardType>().HasData(new CardType{ID="HERO", Name="Hero"}, 
-            new CardType{ID="SPELL", Name="Spell"}, 
-            new CardType{ID="PERMANENT", Name="Permanent"}
-            );
+        modelBuilder.Entity<Faction>().HasData(new Faction { ID = "AX", Name = "Axiom" },
+            new Faction { ID = "BR", Name = "Bravos" },
+            new Faction { ID = "LY", Name = "Lyra" },
+            new Faction { ID = "MU", Name = "Muna" },
+            new Faction { ID = "OR", Name = "Ordis" },
+            new Faction { ID = "YZ", Name = "Yzmir" }
+        );
+        modelBuilder.Entity<Rarity>().HasData(new Rarity { ID = "COMMON", Name = "Common", Short = "C" },
+            new Rarity { ID = "RARE", Name = "Rare", Short = "R" },
+            new Rarity { ID = "UNIQUE", Name = "Unique", Short = "U" }
+        );
+        modelBuilder.Entity<CardType>().HasData(new CardType { ID = "HERO", Name = "Hero" },
+            new CardType { ID = "SPELL", Name = "Spell" },
+            new CardType { ID = "PERMANENT", Name = "Permanent" }
+        );
         modelBuilder.Entity<CardSet>();
         modelBuilder.Entity<Card>();
     }
@@ -58,17 +60,20 @@ public class DatabaseContext : DbContext
             ConfigProvider.LoadConfig(); // Workaround to get migrations working
             config = ConfigProvider.ConfigInstance;
         }
+
         string basePath = config.DbPath;
         if (basePath is null)
         {
             LogUtils.Log("No set path for database, using default");
             basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "NauraaBot");
         }
+
         if (config.Database is null)
         {
             LogUtils.Log("No database name set, using default");
             config.Database = "NauraaBot.db";
         }
+
         Directory.CreateDirectory(basePath);
         string dbPath = Path.Combine(basePath, config.Database);
         LogUtils.Log($"Database path: {dbPath}");
@@ -77,7 +82,8 @@ public class DatabaseContext : DbContext
         {
             connectionString += $"Password={ConfigProvider.ConfigInstance.Password};";
         }
-        optionsBuilder.UseSqlite(connectionString);
-        
+
+        SqliteConnection connection = new SqliteConnection(connectionString);
+        optionsBuilder.UseSqlite(connection);
     }
 }

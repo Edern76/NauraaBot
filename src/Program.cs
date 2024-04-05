@@ -19,6 +19,7 @@ namespace NauraaBot
     {
         static async Task Main(string[] args)
         {
+            SQLitePCL.Batteries.Init();
             ConfigProvider.LoadConfig();
             DatabaseProvider.InitializeDatabase();
             await SchedulerProvider.InitializeScheduler();
