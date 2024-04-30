@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -34,12 +35,19 @@ public static class AlteredAPIRequester
         LogUtils.Log($"Using language code {languageHttpCode} for request to Altered API.");
         request.AddHeader("Accept-Language", languageHttpCode);
         request.AddHeader("User-Agent",
-            "NauraaBot/0..0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
-        request.AddHeader("Accept", "*/*");
+            "NauraaBot/0.4.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+        request.AddHeader("Accept", "application/json");
         request.AddParameter("pagination", "false");
+        request.AddParameter("itemsPerPage", "10000");
         RestResponse response = await _client.ExecuteGetAsync(request);
         string content = StringUtils.Decode(response!.Content);
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
-        return JsonConvert.DeserializeObject<AlteredResponse>(content);
+        List<CardDTO> cardDtos = JsonConvert.DeserializeObject<List<CardDTO>>(content);
+        AlteredResponse
+            alteredResponse = new AlteredResponse()
+            {
+                Members = cardDtos, TotalItems = cardDtos.Count
+            }; // Quick and dirty hack cause I don't want to rewrite other stuff that expects an AlteredResponse
+        return alteredResponse;
     }
 }

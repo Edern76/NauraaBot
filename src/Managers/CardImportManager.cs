@@ -84,8 +84,16 @@ public static class CardImportManager
                 Card mutableCard = cardMissingLanguages;
                 foreach (string language in supportedLanguages)
                 {
-                    CardDTO dto = languageDtos[language].First(dto => dto.Reference == cardMissingLanguages.ID);
-                    FillLocalizedStrings(ref mutableCard, dto, language);
+                    try
+                    {
+                        CardDTO dto = languageDtos[language].First(dto => dto.Reference == cardMissingLanguages.ID);
+                        FillLocalizedStrings(ref mutableCard, dto, language);
+                    }
+                    catch (InvalidOperationException)
+                    {
+                        LogUtils.Error(
+                            $"No data found for card {cardMissingLanguages.Names.en} ({cardMissingLanguages.ID}) in language {language}");
+                    }
                 }
 
                 DatabaseProvider.Db.UpdateCard(cardMissingLanguages);
@@ -248,9 +256,24 @@ public static class CardImportManager
 
     private static void FillLocalizedStrings(ref Card card, CardDTO dto, string language)
     {
-        card.Effect.Set(language, dto.Elements.MainEffect);
-        card.DiscardEffect.Set(language, dto.Elements.DiscardEffect);
-        card.Names.Set(language, dto.Name);
-        card.ImagesURLs.Set(language, dto.ImagePath);
+        if (dto.Elements.MainEffect is not null)
+        {
+            card.Effect.Set(language, dto.Elements.MainEffect);
+        }
+
+        if (dto.Elements.DiscardEffect is not null)
+        {
+            card.DiscardEffect.Set(language, dto.Elements.DiscardEffect);
+        }
+
+        if (dto.Name is not null)
+        {
+            card.Names.Set(language, dto.Name);
+        }
+
+        if (dto.ImagePath is not null)
+        {
+            card.ImagesURLs.Set(language, dto.ImagePath);
+        }
     }
 }

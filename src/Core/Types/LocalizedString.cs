@@ -107,6 +107,11 @@ public class LocalizedString
         {
             int distance;
             string actualName = Get(lang);
+            if (actualName is null)
+            {
+                continue;
+            }
+
             string value = StringUtils.ReplaceSpecialCharacters(actualName).Trim().ToLower();
 
             string[] splitValue = value.Split(' ');
