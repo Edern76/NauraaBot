@@ -20,7 +20,7 @@ public static class ParamsCheckerManager
         availableRarities.Remove("U");
 
         List<string> availableLanguages =
-            ConfigProvider.ConfigInstance.SupportedLanguages.Select(s => s.ToUpper()).ToList();
+            ConfigProvider.ConfigInstance.SupportedLanguages.Select(s => s.ToLower()).ToList();
 
         if (faction != null && !availableFactions.Contains(faction))
         {

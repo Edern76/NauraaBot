@@ -144,6 +144,17 @@ public static class MessageCardNameHandler
 
             Tuple<string?, Card?> searchResult = HandleCardName(cardName, rarity, faction, language);
             string actualLanguage = searchResult.Item1;
+            if (searchResult.Item2 is null)
+            {
+                searchResult = CardSearchManager.SearchCard(cardName, rarity, faction, null);
+                actualLanguage = language.ToLower();
+            }
+
+            if (actualLanguage is null)
+            {
+                actualLanguage = searchResult.Item1;
+            }
+
             Card foundCard = searchResult.Item2;
             if (foundCard is null)
             {
