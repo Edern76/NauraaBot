@@ -147,7 +147,7 @@ public static class MessageCardNameHandler
             if (searchResult.Item2 is null)
             {
                 searchResult = CardSearchManager.SearchCard(cardName, rarity, faction, null);
-                actualLanguage = language.ToLower();
+                actualLanguage = language?.ToLower() ?? searchResult.Item1;
             }
 
             if (actualLanguage is null)
