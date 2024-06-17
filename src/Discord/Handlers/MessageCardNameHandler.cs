@@ -160,7 +160,7 @@ public static class MessageCardNameHandler
             {
                 result = new EmbedBuilder().WithTitle("Not found")
                     .WithDescription(
-                        $"The card with name {cardName} was not found. \n Make sure the name matches exactly the name of the card (search with approximate names may come in a future version)")
+                        $"The card with name {cardName} was not found. \n Check your spelling or try typing a query closer to the card's full name.")
                     .WithColor(Color.Orange)
                     .Build();
             }
