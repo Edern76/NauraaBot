@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace NauraaBot.API.DTO;
 
@@ -22,7 +23,8 @@ public class CardDTO
 
     [JsonProperty("mainFaction")] public IDNameObject MainFaction { get; set; }
     [JsonProperty("name")] public string Name { get; set; }
-    [JsonProperty("elements")] public ElementsDTO Elements { get; set; }
+    [JsonProperty("elements")] public JToken ElementsToken { get; set; }
+    public ElementsDTO Elements { get; set; }
 }
 
 [Serializable]

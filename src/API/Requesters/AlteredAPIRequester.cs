@@ -7,6 +7,7 @@ using NauraaBot.API.DTO;
 using NauraaBot.Core;
 using NauraaBot.Core.Utils;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RestSharp;
 
 namespace NauraaBot.API.Requesters;
@@ -43,6 +44,10 @@ public static class AlteredAPIRequester
         string content = StringUtils.Decode(response!.Content);
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
         List<CardDTO> cardDtos = JsonConvert.DeserializeObject<List<CardDTO>>(content);
+        cardDtos.ForEach(c =>
+        {
+            c.Elements = c.ElementsToken is JObject obj ? obj.ToObject<ElementsDTO>() : new ElementsDTO();
+        });
         AlteredResponse
             alteredResponse = new AlteredResponse()
             {
