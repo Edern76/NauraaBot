@@ -24,10 +24,17 @@ namespace NauraaBot
             DatabaseProvider.InitializeDatabase();
             await SchedulerProvider.InitializeScheduler();
 
-            if (!DatabaseProvider.Db.Cards.Any() || ConfigProvider.ConfigInstance.ForceUpdateDbOnStart ||
-                args.Contains("--force-update-db"))
+            bool forceUpdate = ConfigProvider.ConfigInstance.ForceUpdateDbOnStart ||
+                               args.Contains("--force-update-db");
+
+            if (!DatabaseProvider.Db.Cards.Any() || forceUpdate)
             {
                 await CardImportManager.ImportCardsIntoDatabase();
+            }
+
+            if (forceUpdate)
+            {
+                _ = Task.Run(async () => await CardImportManager.ImportUniquesIntoDatabase());
             }
 
             ScheduleUpdateJob();

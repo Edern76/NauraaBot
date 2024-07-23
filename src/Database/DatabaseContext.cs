@@ -12,6 +12,7 @@ namespace NauraaBot.Database;
 public class DatabaseContext : DbContext
 {
     public DbSet<Card> Cards { get; set; }
+    public DbSet<Unique> Uniques { get; set; }
     public DbSet<Faction> Factions { get; set; }
     public DbSet<CardSet> Sets { get; set; }
     public DbSet<CardType> Types { get; set; }
@@ -26,6 +27,17 @@ public class DatabaseContext : DbContext
         }
 
         this.Update(card);
+    }
+
+    public void UpdateUnique(Unique unique)
+    {
+        Unique existingUnique = this.Uniques.Local.SingleOrDefault(c => c.ID == unique.ID);
+        if (existingUnique != null)
+        {
+            this.Entry(existingUnique).State = EntityState.Detached;
+        }
+
+        this.Update(unique);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -46,7 +58,8 @@ public class DatabaseContext : DbContext
             new CardType { ID = "PERMANENT", Name = "Permanent" }
         );
         modelBuilder.Entity<CardSet>();
-        modelBuilder.Entity<Card>();
+        modelBuilder.Entity<Card>().ToTable("Card");
+        modelBuilder.Entity<Unique>().ToTable("Unique");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

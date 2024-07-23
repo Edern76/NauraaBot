@@ -17,6 +17,7 @@ public class UpdateCardDatabaseJob : IJob
         try
         {
             await CardImportManager.ImportCardsIntoDatabase();
+            await CardImportManager.ImportUniquesIntoDatabase();
         }
         catch (Exception e)
         {

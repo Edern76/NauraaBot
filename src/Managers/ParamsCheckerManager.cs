@@ -17,7 +17,7 @@ public static class ParamsCheckerManager
 
         List<string> availableRarities = DatabaseProvider.Db.Rarities.Select(r => r.Short).ToList();
         availableRarities.Add("P");
-        availableRarities.Remove("U");
+        //availableRarities.Remove("U");
 
         List<string> availableLanguages =
             ConfigProvider.ConfigInstance.SupportedLanguages.Select(s => s.ToLower()).ToList();

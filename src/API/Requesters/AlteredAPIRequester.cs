@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DefaultNamespace;
 using NauraaBot.API.DTO;
 using NauraaBot.Core;
 using NauraaBot.Core.Utils;
@@ -24,8 +25,14 @@ public static class AlteredAPIRequester
             SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
     }
 
-    public static async Task<AlteredResponse> GetCards(string language = "en")
+    public static async Task<AlteredResponse> GetCards(string language = "en",
+        AlteredAPIRequesterSettings settings = null, int? page = null)
     {
+        if (settings is null)
+        {
+            settings = AlteredAPIRequesterSettings.Default;
+        }
+
         if (!Constants.LanguageHttpCodes.ContainsKey(language))
         {
             throw new NotSupportedException($"Language code {language} is not supported");
@@ -36,10 +43,29 @@ public static class AlteredAPIRequester
         LogUtils.Log($"Using language code {languageHttpCode} for request to Altered API.");
         request.AddHeader("Accept-Language", languageHttpCode);
         request.AddHeader("User-Agent",
-            "NauraaBot/0.4.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+            "NauraaBot/0.5.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
         request.AddHeader("Accept", "application/json");
-        request.AddParameter("pagination", "false");
-        request.AddParameter("itemsPerPage", "10000");
+
+        if (settings.Pagination is not null)
+        {
+            request.AddParameter("pagination", settings.Pagination.ToString());
+        }
+
+        if (settings.MaxCardsPerRequest is not null)
+        {
+            request.AddParameter("itemsPerPage", settings.MaxCardsPerRequest.ToString());
+        }
+
+        if (settings.Rarity is not null)
+        {
+            request.AddParameter("rarity[]", "UNIQUE");
+        }
+
+        if (page is not null)
+        {
+            request.AddParameter("page", page.ToString());
+        }
+
         RestResponse response = await _client.ExecuteGetAsync(request);
         string content = StringUtils.Decode(response!.Content);
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
