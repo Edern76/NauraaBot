@@ -34,9 +34,41 @@ public class ElementsDTO
     [JsonProperty("ECHO_EFFECT")] public string? DiscardEffect { get; set; }
     [JsonProperty("PERMANENT")] public int? PermanentsNumber { get; set; }
     [JsonProperty("RESERVE")] public int? ReserveSize { get; set; }
-    [JsonProperty("MAIN_COST")] public int? HandCost { get; set; }
-    [JsonProperty("RECALL_COST")] public int? RecallCost { get; set; }
-    [JsonProperty("OCEAN_POWER")] public int? OceanPower { get; set; }
-    [JsonProperty("MOUNTAIN_POWER")] public int? MountainPower { get; set; }
-    [JsonProperty("FOREST_POWER")] public int? ForestPower { get; set; }
+    [JsonProperty("MAIN_COST")] public string? HandCostRaw { get; set; }
+    public int? HandCost { get; set; }
+    [JsonProperty("RECALL_COST")] public string? RecallCostRaw { get; set; }
+    public int? RecallCost { get; set; }
+    [JsonProperty("OCEAN_POWER")] public string? OceanPowerRaw { get; set; }
+    public int? OceanPower { get; set; }
+    [JsonProperty("MOUNTAIN_POWER")] public string? MountainPowerRaw { get; set; }
+    public int? MountainPower { get; set; }
+    [JsonProperty("FOREST_POWER")] public string? ForestPowerRaw { get; set; }
+    public int? ForestPower { get; set; }
+
+    public void CleanCostsAndPowers()
+    {
+        HandCost = ParseStringToInt(HandCostRaw);
+        RecallCost = ParseStringToInt(RecallCostRaw);
+        OceanPower = ParseStringToInt(OceanPowerRaw);
+        MountainPower = ParseStringToInt(MountainPowerRaw);
+        ForestPower = ParseStringToInt(ForestPowerRaw);
+    }
+
+    private int? ParseStringToInt(string? str)
+    {
+        if (str is null || str.Length == 0)
+        {
+            return null;
+        }
+
+        string cleanedStr = str.Replace("#", "");
+        if (int.TryParse(cleanedStr, out int parsedInt))
+        {
+            return parsedInt;
+        }
+        else
+        {
+            throw new InvalidCastException($"Could not parse string {str} to int");
+        }
+    }
 }

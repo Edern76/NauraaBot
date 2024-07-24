@@ -73,6 +73,7 @@ public static class AlteredAPIRequester
         cardDtos.ForEach(c =>
         {
             c.Elements = c.ElementsToken is JObject obj ? obj.ToObject<ElementsDTO>() : new ElementsDTO();
+            c.Elements.CleanCostsAndPowers();
         });
         AlteredResponse
             alteredResponse = new AlteredResponse()
