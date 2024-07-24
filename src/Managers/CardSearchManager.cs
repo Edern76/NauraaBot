@@ -35,7 +35,7 @@ public static class CardSearchManager
         potentialMatches = CardFilter.FilterMatches(potentialMatches, rarityShort, factionID);
         Card result = potentialMatches.FirstOrDefault();
 
-        if (rarityShort == "U")
+        if (rarityShort == "U" && result is not null)
         {
             List<Unique> matchingUniques = DatabaseProvider.Db.Uniques.Include(unique => unique.CurrentFaction)
                 .Include(unique => unique.MainFaction).Include(unique => unique.Rarity).Include(unique => unique.Set)
