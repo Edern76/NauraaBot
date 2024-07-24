@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using NauraaBot.API.DTO;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
-using NauraaBot.Database;
 using NauraaBot.Database.Models;
 using NauraaBot.Discord;
 using NauraaBot.Managers;

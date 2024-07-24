@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using NauraaBot.Core.Config;
+using NauraaBot.Core.Providers;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
 using NauraaBot.Managers.Utils;
@@ -33,6 +34,17 @@ public static class CardSearchManager
 
         potentialMatches = CardFilter.FilterMatches(potentialMatches, rarityShort, factionID);
         Card result = potentialMatches.FirstOrDefault();
+
+        if (rarityShort == "U")
+        {
+            List<Unique> matchingUniques = DatabaseProvider.Db.Uniques.Include(unique => unique.CurrentFaction)
+                .Include(unique => unique.MainFaction).Include(unique => unique.Rarity).Include(unique => unique.Set)
+                .Include(unique => unique.Type).ToList().Where(u =>
+                    u.Names.Get(actualLanguage) == result.Names.Get(actualLanguage) &&
+                    ((factionID == null && (u.CurrentFaction.ID == result.CurrentFaction.ID)) ||
+                     u.CurrentFaction.ID == result.CurrentFaction.ID)).ToList();
+            result = matchingUniques.ElementAt(RandomProvider.Random.Next(0, matchingUniques.Count));
+        }
 
         return new Tuple<string?, Card?>(actualLanguage, result);
     }
