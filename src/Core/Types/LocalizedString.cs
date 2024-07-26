@@ -91,6 +91,34 @@ public class LocalizedString
         return result;
     }
 
+    public void FillMissingLanguagesFrom(LocalizedString other)
+    {
+        if (this.en is null && other.en is not null)
+        {
+            this.en = other.en;
+        }
+
+        if (this.fr is null && other.fr is not null)
+        {
+            this.fr = other.fr;
+        }
+
+        if (this.de is null && other.de is not null)
+        {
+            this.de = other.de;
+        }
+
+        if (this.es is null && other.es is not null)
+        {
+            this.es = other.es;
+        }
+
+        if (this.it is null && other.it is not null)
+        {
+            this.it = other.it;
+        }
+    }
+
     // Oh man this is pretty ugly
     // But it works
     // Kinda

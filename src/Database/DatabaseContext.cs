@@ -24,7 +24,12 @@ public class DatabaseContext : DbContext
         if (existingCard != null)
         {
             this.Entry(existingCard).State = EntityState.Detached;
+            card.Names.FillMissingLanguagesFrom(existingCard.Names);
+            card.ImagesURLs.FillMissingLanguagesFrom(existingCard.ImagesURLs);
+            card.Effect.FillMissingLanguagesFrom(existingCard.Effect);
+            card.DiscardEffect.FillMissingLanguagesFrom(existingCard.DiscardEffect);
         }
+
 
         this.Update(card);
     }
@@ -35,6 +40,10 @@ public class DatabaseContext : DbContext
         if (existingUnique != null)
         {
             this.Entry(existingUnique).State = EntityState.Detached;
+            unique.Names.FillMissingLanguagesFrom(existingUnique.Names);
+            unique.ImagesURLs.FillMissingLanguagesFrom(existingUnique.ImagesURLs);
+            unique.Effect.FillMissingLanguagesFrom(existingUnique.Effect);
+            unique.DiscardEffect.FillMissingLanguagesFrom(existingUnique.DiscardEffect);
         }
 
         this.Update(unique);

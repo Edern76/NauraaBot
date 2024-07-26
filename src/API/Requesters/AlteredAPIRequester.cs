@@ -26,7 +26,7 @@ public static class AlteredAPIRequester
     }
 
     public static async Task<AlteredResponse> GetCards(string language = "en",
-        AlteredAPIRequesterSettings settings = null, int? page = null)
+        AlteredAPIRequesterSettings settings = null, string? name = null, int? page = null)
     {
         if (settings is null)
         {
@@ -61,9 +61,20 @@ public static class AlteredAPIRequester
             request.AddParameter("rarity[]", "UNIQUE");
         }
 
+        if (settings.Faction is not null)
+        {
+            request.AddParameter("factions[]", settings.Faction);
+        }
+
         if (page is not null)
         {
             request.AddParameter("page", page.ToString());
+        }
+
+
+        if (name is not null)
+        {
+            request.AddParameter("translations.name", Uri.EscapeDataString(name));
         }
 
         RestResponse response = await _client.ExecuteGetAsync(request);
