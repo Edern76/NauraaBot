@@ -73,6 +73,16 @@ public class Card
             recap.PowerString = $"{this.Power.Forest}/{this.Power.Mountain}/{this.Power.Ocean}";
         }
 
+        if (this.Elo is not null)
+        {
+            recap.Elo = this.Elo.Value;
+        }
+
+        if (this.AverageFamilyElo is not null)
+        {
+            recap.AverageFamilyElo = this.AverageFamilyElo.Value;
+        }
+
         return recap;
     }
 

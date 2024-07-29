@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NauraaBot.Database.Models;
 using NauraaBot.Discord.Types.Search;
 using NauraaBot.Managers;
@@ -7,7 +8,7 @@ namespace NauraaBot.Discord.Handlers.Search;
 
 public class RegularSearchHandler : ISearchHandler
 {
-    public Tuple<string, Card> Search(string query, SearchParams searchParams)
+    public Task<Tuple<string, Card>> Search(string query, SearchParams searchParams)
     {
         Tuple<string, Card?> result;
         switch (query.ToLower())
@@ -20,6 +21,6 @@ public class RegularSearchHandler : ISearchHandler
                 break;
         }
 
-        return result;
+        return Task.FromResult(result);
     }
 }

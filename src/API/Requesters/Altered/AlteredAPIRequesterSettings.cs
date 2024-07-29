@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DefaultNamespace;
+namespace NauraaBot.API.Requesters.Altered;
 
 public class AlteredAPIRequesterSettings : ICloneable
 {

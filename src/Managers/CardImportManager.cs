@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DefaultNamespace;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using NauraaBot.API.DTO;
-using NauraaBot.API.Requesters;
+using NauraaBot.API.Requesters.Altered;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;

@@ -15,4 +15,6 @@ public class CardRecap
     public string CardSet { get; set; }
     public string? CostString { get; set; }
     public string? PowerString { get; set; }
+    public double? Elo { get; set; }
+    public double? AverageFamilyElo { get; set; }
 }

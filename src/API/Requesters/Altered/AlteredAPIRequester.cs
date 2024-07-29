@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using DefaultNamespace;
 using NauraaBot.API.DTO;
 using NauraaBot.Core;
 using NauraaBot.Core.Utils;
@@ -11,7 +9,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RestSharp;
 
-namespace NauraaBot.API.Requesters;
+namespace NauraaBot.API.Requesters.Altered;
 
 public static class AlteredAPIRequester
 {

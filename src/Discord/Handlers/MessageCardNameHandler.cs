@@ -5,6 +5,8 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
+using NauraaBot.API.DTO;
+using NauraaBot.API.Requesters.UniquesRanker;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Exception;
 using NauraaBot.Core.Types;
@@ -45,7 +47,7 @@ public static class MessageCardNameHandler
             List<Embed> embedsToSend = new List<Embed>();
             foreach (Match match in matches)
             {
-                Embed embed = HandleMatch(match);
+                Embed embed = await HandleMatch(match);
                 embedsToSend.Add(embed);
             }
 
@@ -81,7 +83,7 @@ public static class MessageCardNameHandler
         }
     }
 
-    private static Embed HandleMatch(Match match)
+    private static async Task<Embed> HandleMatch(Match match)
     {
         Embed result;
         try
@@ -90,9 +92,6 @@ public static class MessageCardNameHandler
             string innerString = match.Groups[2].Value;
             string optionsString = match.Groups[1].Value;
             string cardName;
-            string? rarity;
-            string? faction;
-            string? language;
             string[] split = innerString.Split('|');
             cardName = split[0].Trim();
             SearchIntent intent = cardName.Contains('_') ? SearchIntent.UNIQUE_ID : SearchIntent.GENERIC;
@@ -124,16 +123,11 @@ public static class MessageCardNameHandler
                 return result;
             }
 
-            Tuple<string?, Card?> searchResult = HandleCardName(cardName, parsedParams, intent);
+            Tuple<string?, Card?> searchResult = await HandleCardName(cardName, parsedParams, intent);
             string actualLanguage = searchResult.Item1;
             if (searchResult.Item2 is null)
             {
-                SearchParams secondPassParams = new SearchParams()
-                {
-                    Faction = parsedParams.Faction,
-                    Rarity = parsedParams.Rarity,
-                    Language = null,
-                };
+                SearchParams secondPassParams = parsedParams with { Language = null };
                 searchResult = CardSearchManager.SearchCard(cardName, secondPassParams);
                 actualLanguage = parsedParams.Language?.ToLower() ?? searchResult.Item1;
             }
@@ -176,7 +170,7 @@ public static class MessageCardNameHandler
         return result;
     }
 
-    private static Tuple<string, Card?> HandleCardName(string expression, SearchParams searchParams,
+    private static async Task<Tuple<string, Card?>> HandleCardName(string expression, SearchParams searchParams,
         SearchIntent intent)
     {
         ISearchHandler handler;
@@ -193,7 +187,25 @@ public static class MessageCardNameHandler
                     $"No handler has been implemented for intent {intent.ToString()}");
         }
 
-        Tuple<string, Card?> result = handler.Search(expression, searchParams);
+        Tuple<string, Card?> result = await handler.Search(expression, searchParams);
+        if (result.Item2 is Unique unique)
+        {
+            try
+            {
+                UniqueElos elos = await UniquesRankerRequester.GetRankingAsync(unique.ID);
+                result.Item2.Elo = elos.Elo;
+                result.Item2.AverageFamilyElo = elos.AverageFamilyElo;
+            }
+            catch (KeyNotFoundException)
+            {
+                // Ignore
+            }
+            catch (Exception e)
+            {
+                LogUtils.Error(e.ToString());
+            }
+        }
+
         return result;
     }
 
