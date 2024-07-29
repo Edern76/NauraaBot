@@ -2,18 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Providers;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
+using NauraaBot.Discord.Types.Search;
 using NauraaBot.Managers.Utils;
 
 namespace NauraaBot.Managers;
 
 public static class CardSearchManager
 {
-    public static Tuple<string?, Card> SearchCard(string name, string? rarityShort, string? factionID,
-        string? language = null)
+    public static Tuple<string?, Card> SearchCard(string name, SearchParams searchParams)
     {
         /*
          * Approximate search algorithm (reminder for later) :
@@ -24,29 +25,47 @@ public static class CardSearchManager
          */
 
 
-        List<Card> allCards = DatabaseProvider.Db.Cards.Include(card => card.CurrentFaction)
+        IIncludableQueryable<Card, CardType> query = DatabaseProvider.Db.Cards.Include(card => card.CurrentFaction)
             .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
-            .Include(card => card.Type).ToList();
-        Tuple<string, List<Card>> nameSearchResult = GetPotentialMatches(allCards, name, language);
+            .Include(card => card.Type);
+        if (searchParams.Rarity != "U")
+        {
+            query = query.Where(card => card.Rarity.ID != "UNIQUE")
+                .Include(card =>
+                    card.Type); // Exclude uniques at the DB level for performance boost, the last include is useless but it's required for type compliance
+        }
+
+        List<Card> allCards = query.ToList();
+        Tuple<string, List<Card>> nameSearchResult = GetPotentialMatches(allCards, name, searchParams.Language);
 
         string actualLanguage = nameSearchResult.Item1;
         List<Card> potentialMatches = nameSearchResult.Item2;
 
-        potentialMatches = CardFilter.FilterMatches(potentialMatches, rarityShort, factionID);
+        potentialMatches = CardFilter.FilterMatches(potentialMatches, searchParams.Rarity, searchParams.Faction);
         Card result = potentialMatches.FirstOrDefault();
 
-        if (rarityShort == "U" && result is not null)
+        if (searchParams.Rarity == "U" && result is not null)
         {
             List<Unique> matchingUniques = DatabaseProvider.Db.Uniques.Include(unique => unique.CurrentFaction)
                 .Include(unique => unique.MainFaction).Include(unique => unique.Rarity).Include(unique => unique.Set)
                 .Include(unique => unique.Type).ToList().Where(u =>
                     u.Names.Get(actualLanguage) == result.Names.Get(actualLanguage) &&
-                    ((factionID == null && (u.CurrentFaction.ID == result.CurrentFaction.ID)) ||
+                    ((searchParams.Faction == null && (u.CurrentFaction.ID == result.CurrentFaction.ID)) ||
                      u.CurrentFaction.ID == result.CurrentFaction.ID)).ToList();
             result = matchingUniques.ElementAt(RandomProvider.Random.Next(0, matchingUniques.Count));
         }
 
         return new Tuple<string?, Card?>(actualLanguage, result);
+    }
+
+    public static Tuple<string, Unique> SeachUnique(string ID, SearchParams searchParams)
+    {
+        Unique unique = DatabaseProvider.Db.Uniques.Include(card => card.CurrentFaction)
+            .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
+            .Include(card => card.Type).FirstOrDefault(u => u.ID.ToUpper() == ID.ToUpper());
+        string actualLanguage = searchParams.Language ?? "en";
+
+        return new Tuple<string, Unique>(actualLanguage, unique);
     }
 
     public static Tuple<string, List<Card>> GetPotentialMatches(List<Card> cards, string name, string? language = null)

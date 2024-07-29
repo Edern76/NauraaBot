@@ -11,6 +11,9 @@ using NauraaBot.Core.Types;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
 using NauraaBot.Discord.Embeds;
+using NauraaBot.Discord.Handlers.Parsers;
+using NauraaBot.Discord.Handlers.Search;
+using NauraaBot.Discord.Types.Search;
 using NauraaBot.Managers;
 
 namespace NauraaBot.Discord.Handlers;
@@ -92,45 +95,24 @@ public static class MessageCardNameHandler
             string? language;
             string[] split = innerString.Split('|');
             cardName = split[0].Trim();
-            if (split.Length == 1)
+            SearchIntent intent = cardName.Contains('_') ? SearchIntent.UNIQUE_ID : SearchIntent.GENERIC;
+            ISearchParser parser;
+            switch (intent)
             {
-                rarity = null;
-                faction = null;
-                language = null;
-            }
-            else if (split.Length == 2 || split.Length == 3)
-            {
-                string options = split[1].Trim();
-                string[] optionsArray = options.Split(',');
-                rarity = optionsArray[0].Trim();
-                faction = optionsArray.Length > 1 ? optionsArray[1].Trim() : null;
-                if (faction is null &&
-                    string.Equals(rarity.ToUpper(), "OOF", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    rarity = "R";
-                    faction = "OOF";
-                }
-
-                if (rarity is not null && rarity.Trim().Length == 0)
-                {
-                    rarity = null;
-                }
-
-                if (split.Length == 3)
-                {
-                    language = split[2].Trim().ToLower();
-                }
-                else
-                {
-                    language = null;
-                }
-            }
-            else
-            {
-                throw new InvalidQueryFormatException(innerString);
+                case SearchIntent.UNIQUE_ID:
+                    parser = new UniqueSearchParser();
+                    break;
+                case SearchIntent.GENERIC:
+                    parser = new RegularSearchParser();
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        $"No parser has been implemented for intent {intent.ToString()}");
             }
 
-            List<string> paramErrors = ParamsCheckerManager.GetParamErrors(faction, rarity, language);
+            SearchParams parsedParams = parser.Parse(innerString);
+
+            List<string> paramErrors = ParamsCheckerManager.GetParamErrors(parsedParams);
             if (paramErrors.Count > 0)
             {
                 string errorString = string.Join("\n", paramErrors.Select(s => $"- {s}"));
@@ -142,12 +124,18 @@ public static class MessageCardNameHandler
                 return result;
             }
 
-            Tuple<string?, Card?> searchResult = HandleCardName(cardName, rarity, faction, language);
+            Tuple<string?, Card?> searchResult = HandleCardName(cardName, parsedParams, intent);
             string actualLanguage = searchResult.Item1;
             if (searchResult.Item2 is null)
             {
-                searchResult = CardSearchManager.SearchCard(cardName, rarity, faction, null);
-                actualLanguage = language?.ToLower() ?? searchResult.Item1;
+                SearchParams secondPassParams = new SearchParams()
+                {
+                    Faction = parsedParams.Faction,
+                    Rarity = parsedParams.Rarity,
+                    Language = null,
+                };
+                searchResult = CardSearchManager.SearchCard(cardName, secondPassParams);
+                actualLanguage = parsedParams.Language?.ToLower() ?? searchResult.Item1;
             }
 
             if (actualLanguage is null)
@@ -172,8 +160,15 @@ public static class MessageCardNameHandler
         }
         catch (InvalidQueryFormatException iqfe)
         {
+            string errorMessage = $"The search query \"{iqfe.Query}\"'s format has not been recognized.";
+            if (iqfe.Intent == SearchIntent.UNIQUE_ID)
+            {
+                errorMessage +=
+                    "\n\n Please note that unique IDs queries only accept a single language parameter after the card name (ex : {{UNIQUE_ID|FR}})";
+            }
+
             result = new EmbedBuilder().WithTitle("Invalid format")
-                .WithDescription($"The search query \"{iqfe.Query}\"'s format has not been recognized.")
+                .WithDescription(errorMessage)
                 .WithColor(Color.Orange)
                 .Build();
         }
@@ -181,20 +176,24 @@ public static class MessageCardNameHandler
         return result;
     }
 
-    private static Tuple<string, Card?> HandleCardName(string expression, string? rarity, string? faction,
-        string? language)
+    private static Tuple<string, Card?> HandleCardName(string expression, SearchParams searchParams,
+        SearchIntent intent)
     {
-        Tuple<string, Card?> result;
-        switch (expression.ToLower())
+        ISearchHandler handler;
+        switch (intent)
         {
-            case "rand()":
-                result = CardRandomManager.RandomCard(expression, rarity, faction, language);
+            case SearchIntent.UNIQUE_ID:
+                handler = new UniqueIDSearchHandler();
+                break;
+            case SearchIntent.GENERIC:
+                handler = new RegularSearchHandler();
                 break;
             default:
-                result = CardSearchManager.SearchCard(expression, rarity, faction, language);
-                break;
+                throw new ArgumentOutOfRangeException(
+                    $"No handler has been implemented for intent {intent.ToString()}");
         }
 
+        Tuple<string, Card?> result = handler.Search(expression, searchParams);
         return result;
     }
 

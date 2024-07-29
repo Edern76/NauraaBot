@@ -3,12 +3,13 @@ using System.Linq;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Error;
 using NauraaBot.Database.Models;
+using NauraaBot.Discord.Types.Search;
 
 namespace NauraaBot.Managers;
 
 public static class ParamsCheckerManager
 {
-    public static List<string> GetParamErrors(string faction, string rarity, string language)
+    public static List<string> GetParamErrors(SearchParams searchParams)
     {
         List<string> errors = new List<string>();
 
@@ -22,21 +23,21 @@ public static class ParamsCheckerManager
         List<string> availableLanguages =
             ConfigProvider.ConfigInstance.SupportedLanguages.Select(s => s.ToLower()).ToList();
 
-        if (faction != null && !availableFactions.Contains(faction))
+        if (searchParams.Faction != null && !availableFactions.Contains(searchParams.Faction))
         {
-            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_FACTION, faction,
+            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_FACTION, searchParams.Faction,
                 string.Join(", ", availableFactions)));
         }
 
-        if (rarity != null && !availableRarities.Contains(rarity))
+        if (searchParams.Rarity != null && !availableRarities.Contains(searchParams.Rarity))
         {
-            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_RARITY, rarity,
+            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_RARITY, searchParams.Rarity,
                 string.Join(", ", availableRarities)));
         }
 
-        if (language != null && !availableLanguages.Contains(language))
+        if (searchParams.Language != null && !availableLanguages.Contains(searchParams.Language))
         {
-            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_LANGUAGE, language,
+            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_LANGUAGE, searchParams.Language,
                 string.Join(", ", availableLanguages)));
         }
 

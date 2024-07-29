@@ -10,6 +10,7 @@ using NauraaBot.Core.Utils;
 namespace NauraaBot.Database.Models;
 
 [Table("Card")]
+[Index(nameof(ID), IsUnique = true)]
 public class Card
 {
     public string ID { get; set; } // Card reference
@@ -25,6 +26,9 @@ public class Card
     public LocalizedString DiscardEffect { get; set; } = new LocalizedString();
     public Costs? Costs { get; set; }
     public Power? Power { get; set; }
+
+    [NotMapped] public double? Elo { get; set; }
+    [NotMapped] public double? AverageFamilyElo { get; set; }
 
     public CardRecap ToCardRecap(string language = "en")
     {
