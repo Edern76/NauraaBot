@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace NauraaBot.Database.Models;
 
 [Table("CardSet")]
+[Index(nameof(ID), IsUnique = true)]
 public class CardSet
 {
     public string ID { get; set; }

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace NauraaBot.Database.Models;
 
 [Table("CardType")]
+[Index(nameof(ID), IsUnique = true)]
 public class CardType
 {
     [Key]
