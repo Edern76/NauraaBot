@@ -97,53 +97,71 @@ public static class CardImportManager
         List<Rarity> rarities = DatabaseProvider.Db.Rarities.ToList();
         List<Faction> factions = DatabaseProvider.Db.Factions.ToList();
         int totalUniquesImported = 0;
-        foreach (string faction in factionsIds)
+        List<Task<int>> tasks = factionsIds.Where(f => f != "NE").Select(f => ImportFactionsUniques(existingUniquesIds,
+            sets, types,
+            rarities, factions, f)).ToList();
+        int[] results = await Task.WhenAll(tasks);
+        totalUniquesImported += results.Sum();
+        LogUtils.Log($"All factions processed, {totalUniquesImported} uniques imported");
+        if (totalUniquesImported > 0)
         {
-            int currentPage = 1;
-            int uniquesFoundOnPage = -1;
-            int namedUniquesImported = 0;
-
-            while (uniquesFoundOnPage != 0)
-            {
-                AlteredAPIRequesterSettings settings =
-                    (AlteredAPIRequesterSettings)AlteredAPIRequesterSettings.Uniques.Clone();
-                settings.Faction = faction;
-                AlteredResponse apiResponse =
-                    await AlteredAPIRequester.GetCards("en", settings, null,
-                        currentPage);
-                List<CardDTO> dtos = apiResponse.Members;
-                uniquesFoundOnPage = dtos.Count;
-                if (uniquesFoundOnPage > 0)
-                {
-                    foreach (CardDTO dto in dtos)
-                    {
-                        Card card = CreateCard(dto, sets, types, rarities, factions);
-                        Unique unique = Unique.FromCard(card);
-                        if (!existingUniquesIds.Contains(unique.ID))
-                        {
-                            DatabaseProvider.Db.Add(unique);
-                            namedUniquesImported++;
-                        }
-                    }
-                }
-
-                currentPage++;
-            }
-
-            if (namedUniquesImported > 0)
-            {
-                totalUniquesImported += namedUniquesImported;
-                DatabaseProvider.Db.SaveChanges();
-                LogUtils.Log($"Imported or updated {namedUniquesImported} uniques for faction {faction}");
-            }
-
-            await FillUniquesMissingLanguages(faction);
+            await DatabaseProvider.Db.SaveChangesAsync();
         }
 
 
         DateTime end = DateTime.Now;
         LogUtils.Log(
             $"Uniques import finished in {(end - start).TotalSeconds} seconds with {totalUniquesImported} uniques imported.");
+    }
+
+    private static async Task<int> ImportFactionsUniques(List<string> existingUniquesIds, List<CardSet> sets,
+        List<CardType> types, List<Rarity> rarities, List<Faction> factions, string faction)
+    {
+        LogUtils.Log($"Handling uniques for faction {faction}.");
+        List<Unique> newUniques = new List<Unique>();
+        int currentPage = 1;
+        int uniquesFoundOnPage = -1;
+        int uniquesImported = 0;
+        int lastModulo = 0;
+
+        while (uniquesFoundOnPage != 0)
+        {
+            AlteredAPIRequesterSettings settings =
+                (AlteredAPIRequesterSettings)AlteredAPIRequesterSettings.Uniques.Clone();
+            settings.Faction = faction;
+            AlteredResponse apiResponse =
+                await AlteredAPIRequester.GetCards("en", settings, null,
+                    currentPage);
+            List<CardDTO> dtos = apiResponse.Members;
+            uniquesFoundOnPage = dtos.Count;
+            if (uniquesFoundOnPage > 0)
+            {
+                foreach (CardDTO dto in dtos)
+                {
+                    Card card = CreateCard(dto, sets, types, rarities, factions);
+                    Unique unique = Unique.FromCard(card);
+                    if (!existingUniquesIds.Contains(unique.ID))
+                    {
+                        newUniques.Add(unique);
+                        uniquesImported++;
+                    }
+                }
+
+                int modulo = 500 & uniquesImported;
+                if (modulo > lastModulo)
+                {
+                    lastModulo = modulo;
+                    LogUtils.Log($"Imported {uniquesImported} uniques for faction {faction}.");
+                }
+            }
+
+            currentPage++;
+        }
+
+        List<Unique> filledUniques = await FillUniquesMissingLanguages(newUniques, faction);
+        filledUniques.ForEach(u => DatabaseProvider.Db.AddOrUpdateUnique(u));
+        LogUtils.Log($"Done with faction {faction}, added {filledUniques.Count} uniques.");
+        return filledUniques.Count;
     }
 
     private static async Task FillCardsMissingLanguages()
@@ -213,46 +231,29 @@ public static class CardImportManager
         }
     }
 
-    private static async Task FillUniquesMissingLanguages(string faction = null)
+    private static async Task<List<Unique>> FillUniquesMissingLanguages(List<Unique> factionUniques,
+        string faction = null)
     {
-        LogUtils.Log("Checking for  uniques missing languages...");
-        List<Unique> uniquesMissingLanguages =
-            DatabaseProvider.Db.Uniques.Include(unique => unique.CurrentFaction).ToList().Where(c =>
-                ((faction is null || c.CurrentFaction.ID == faction) && c.GetMissingLanguages().Count > 0)).ToList();
+        LogUtils.Log("Checking for uniques missing languages...");
+        HashSet<Unique> uniquesMissingLanguagesToAdd =
+            factionUniques.Where(c => c.GetMissingLanguages().Count > 0).ToHashSet();
+        HashSet<string> idsToAdd = uniquesMissingLanguagesToAdd.Select(u => u.ID).ToHashSet();
+        HashSet<Unique> uniquesMissingLanguagesFromDb = DatabaseProvider.Db.Uniques.Include(card => card.CurrentFaction)
+            .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
+            .Include(card => card.Type).Where(u => u.CurrentFaction.ID == faction && u.Rarity.ID == "UNIQUE").ToList()
+            .Where(u => u.GetMissingLanguages().Count > 0 && !idsToAdd.Contains(u.ID)).ToHashSet();
+        HashSet<Unique> uniquesMissingLanguages =
+            uniquesMissingLanguagesToAdd.Union(uniquesMissingLanguagesFromDb).ToHashSet();
         if (uniquesMissingLanguages.Count > 0)
         {
             LogUtils.Log($"{uniquesMissingLanguages.Count} uniques are missing languages.");
-            Dictionary<string, List<CardDTO>> languageDtos = new Dictionary<string, List<CardDTO>>();
+
             IEnumerable<String> supportedLanguages =
                 ConfigProvider.ConfigInstance.SupportedLanguages.Where(l => l != "en");
-            foreach (string language in supportedLanguages)
-            {
-                int currentPage = 1;
-                int uniquesFoundOnPage = -1;
-                while (uniquesFoundOnPage != 0)
-                {
-                    AlteredAPIRequesterSettings settings =
-                        (AlteredAPIRequesterSettings)AlteredAPIRequesterSettings.Uniques.Clone();
-                    settings.Faction = faction;
-                    AlteredResponse apiResponse = await AlteredAPIRequester.GetCards(language,
-                        settings, null, currentPage);
-                    List<CardDTO> dtos = apiResponse.Members;
-                    uniquesFoundOnPage = dtos.Count;
-                    if (uniquesFoundOnPage > 0)
-                    {
-                        if (!languageDtos.ContainsKey(language))
-                        {
-                            languageDtos.Add(language, dtos);
-                        }
-                        else
-                        {
-                            languageDtos[language].AddRange(dtos);
-                        }
-                    }
-
-                    currentPage++;
-                }
-            }
+            List<Task<Tuple<string, List<CardDTO>>>> tasks = supportedLanguages
+                .Select(l => HandleUniquesLanguage(l, faction)).ToList();
+            Tuple<string, List<CardDTO>>[] results = await Task.WhenAll(tasks);
+            Dictionary<string, List<CardDTO>> languageDtos = results.ToDictionary(r => r.Item1, r => r.Item2);
 
             foreach (Unique uniqueMissingLanguages in uniquesMissingLanguages)
             {
@@ -263,25 +264,76 @@ public static class CardImportManager
                     {
                         CardDTO dto = languageDtos[language].First(dto => dto.Reference == uniqueMissingLanguages.ID);
                         FillLocalizedStrings(ref mutableUnique, dto, language);
+                        Unique existingUnique = factionUniques.FirstOrDefault(u => u.ID == mutableUnique.ID);
+                        if (existingUnique is null)
+                        {
+                            factionUniques.Add(mutableUnique);
+                        }
+                        else
+                        {
+                            existingUnique.FillMissingLanguagesFrom(mutableUnique);
+                        }
                     }
                     catch (InvalidOperationException)
                     {
-                        LogUtils.Error(
-                            $"No data found for unique {uniqueMissingLanguages.Names.en} ({uniqueMissingLanguages.ID}) in language {language}");
+                        //LogUtils.Error($"No data found for unique {uniqueMissingLanguages.Names.en} ({uniqueMissingLanguages.ID}) in language {language}");
                     }
                 }
-
-                DatabaseProvider.Db.UpdateUnique(uniqueMissingLanguages);
             }
 
-            DatabaseProvider.Db.SaveChanges();
             LogUtils.Log("Done updating uniques languages.");
         }
         else
         {
             LogUtils.Log("No uniques missing languages.");
         }
+
+        return factionUniques;
     }
+
+    private static async Task<Tuple<string, List<CardDTO>>> HandleUniquesLanguage(
+        string language,
+        string faction)
+    {
+        LogUtils.Log($"Handling uniques language {language} for faction {faction}.");
+        int currentPage = 1;
+        int uniquesFoundOnPage = -1;
+        List<CardDTO> resultDtos = new List<CardDTO>();
+        while (uniquesFoundOnPage != 0)
+        {
+            try
+            {
+                AlteredAPIRequesterSettings settings =
+                    (AlteredAPIRequesterSettings)AlteredAPIRequesterSettings.Uniques.Clone();
+                settings.Faction = faction;
+                AlteredResponse apiResponse = await AlteredAPIRequester.GetCards(language,
+                    settings, null, currentPage);
+                List<CardDTO> dtos = apiResponse.Members;
+                uniquesFoundOnPage = dtos.Count;
+                if (uniquesFoundOnPage > 0)
+                {
+                    resultDtos.AddRange(dtos);
+                }
+                else
+                {
+                    LogUtils.Log(
+                        $"No uniques found on page {currentPage} for faction {faction} with language {language}.");
+                }
+
+                currentPage++;
+            }
+            catch (Exception e)
+            {
+                LogUtils.Error(
+                    $"Error while fetching uniques for faction {faction} with language {language} on page {currentPage} : {e.ToString()}");
+                currentPage++;
+            }
+        }
+
+        LogUtils.Log($"Done with language {language} for faction {faction}.");
+        return new Tuple<string, List<CardDTO>>(language, resultDtos);
+    }
+
 
     // For simplicity's sake we're gonna assume no new rarities will be added. We can always go back and change that if needed.
     // Also we need to make sure we're only running this on the english response. Non translated metadata should not be generated from other languages.

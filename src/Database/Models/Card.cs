@@ -30,6 +30,14 @@ public class Card
     [NotMapped] public double? Elo { get; set; }
     [NotMapped] public double? AverageFamilyElo { get; set; }
 
+    public void FillMissingLanguagesFrom(Card other)
+    {
+        this.Names.FillMissingLanguagesFrom(other.Names);
+        this.ImagesURLs.FillMissingLanguagesFrom(other.ImagesURLs);
+        this.Effect.FillMissingLanguagesFrom(other.Effect);
+        this.DiscardEffect.FillMissingLanguagesFrom(other.DiscardEffect);
+    }
+
     public CardRecap ToCardRecap(string language = "en")
     {
         string name = this.Names.Get(language);

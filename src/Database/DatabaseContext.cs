@@ -34,6 +34,18 @@ public class DatabaseContext : DbContext
         this.Update(card);
     }
 
+    public void AddOrUpdateUnique(Unique unique)
+    {
+        if (this.Uniques.Any(u => u.ID == unique.ID))
+        {
+            this.UpdateUnique(unique);
+        }
+        else
+        {
+            this.Add(unique);
+        }
+    }
+
     public void UpdateUnique(Unique unique)
     {
         Unique existingUnique = this.Uniques.Local.SingleOrDefault(c => c.ID == unique.ID);
