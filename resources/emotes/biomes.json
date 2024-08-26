@@ -1,0 +1,17 @@
+[
+	{
+		"name": "Forest",
+		"replaces": "{V}",
+		"code": "<:forest:1277661362771722310>"
+	},
+	{
+		"name": "Mountain",
+		"replaces": "{M}",
+		"code": "<:mountain:1277661419579637832>"
+	},
+	{
+		"name": "Ocean",
+		"replaces": "{O}",
+		"code": "<:ocean:1277661528509775915>"
+	},
+]

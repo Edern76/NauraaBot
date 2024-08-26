@@ -1,0 +1,23 @@
+[
+	{
+		"name": "Hand",
+		"replaces": "{H}",
+		"code": "<:hand:1277659790268563466>"
+	},
+	{
+		"name": "Reserve",
+		"replaces": "{O}",
+		"code": "<:reserve:1277660510409719910>"
+	},
+	{
+		"name": "Arrow",
+		"replaces": "{J}",
+		"code": "<:arrow:1277660209916940450>"
+	},
+		{
+		"name": "Discard",
+		"replaces": "{D}",
+		"code": "<:discard:1277661619509526580>"
+	},
+
+]

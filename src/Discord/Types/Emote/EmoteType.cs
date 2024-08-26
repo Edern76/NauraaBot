@@ -2,5 +2,7 @@
 
 public enum EmoteType
 {
-    Faction
+    Faction,
+    Trigger,
+    Biome,
 }

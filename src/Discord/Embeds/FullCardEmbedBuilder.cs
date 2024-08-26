@@ -2,6 +2,7 @@
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Types;
 using NauraaBot.Discord.Types.Emote;
+using NauraaBot.Discord.Utils;
 
 namespace NauraaBot.Discord.Embeds;
 
@@ -19,7 +20,7 @@ public class FullCardEmbedBuilder : ICardEmbedBuilder
         EmbedBuilder builder = new EmbedBuilder().WithTitle(recap.Name)
             .WithUrl(recap.URL)
             .WithThumbnailUrl(recap.ImageURL)
-            .WithDescription(recap.Effect)
+            .WithDescription(EmbedEffectStringConverter.ToEmbedEffectString(recap.Effect))
             .AddField("Type", recap.CardType, true)
             .AddField("Rarity", recap.Rarity, true)
             .AddField("Set", recap.CardSet, true)
