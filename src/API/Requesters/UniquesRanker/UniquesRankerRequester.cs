@@ -8,37 +8,34 @@ using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
 using NauraaBot.API.DTO;
+using NauraaBot.Core.Utils;
+using Newtonsoft.Json;
+using RestSharp;
 
 namespace NauraaBot.API.Requesters.UniquesRanker;
 
 public class UniquesRankerRequester
 {
-    private static readonly HttpClient _httpClient;
+    private static RestClient _client;
 
     static UniquesRankerRequester()
     {
-        _httpClient = new HttpClient();
-        _httpClient.Timeout = TimeSpan.FromSeconds(5);
+        RestClientOptions options = new RestClientOptions("https://uniquesranking.onrender.com/");
+        _client = new RestClient(options);
+        ServicePointManager.SecurityProtocol =
+            SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
     }
 
     public static async Task<UniqueElos> GetRankingAsync(string uniqueId)
     {
         try
         {
-            string html = await _httpClient.GetStringAsync($"https://uniquesranking.onrender.com/card/{uniqueId}");
-            IBrowsingContext context = BrowsingContext.New(Configuration.Default);
-            IDocument document = await context.OpenAsync(req => req.Content(html));
-            IEnumerable<IElement> elements = document.QuerySelectorAll("span.stat-value");
-            if (elements.Count() < 2)
-            {
-                throw new KeyNotFoundException("Unique not found");
-            }
+            RestRequest request = new RestRequest($"/json/{uniqueId}", Method.Get);
+            RestResponse response = await _client.ExecuteGetAsync(request);
+            string content = StringUtils.Decode(response!.Content);
+            UniqueElos uniqueElos = JsonConvert.DeserializeObject<UniqueElos>(content);
 
-            return new UniqueElos()
-            {
-                Elo = double.Parse(elements.ElementAt(0).TextContent, CultureInfo.InvariantCulture),
-                AverageFamilyElo = double.Parse(elements.ElementAt(1).TextContent, CultureInfo.InvariantCulture),
-            };
+            return uniqueElos;
         }
         catch (HttpRequestException e)
         {

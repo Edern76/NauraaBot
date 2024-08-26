@@ -1,7 +1,9 @@
-﻿namespace NauraaBot.API.DTO;
+﻿using Newtonsoft.Json;
+
+namespace NauraaBot.API.DTO;
 
 public struct UniqueElos
 {
-    public double? Elo;
-    public double? AverageFamilyElo;
+    [JsonProperty("elo")] public double? Elo;
+    [JsonProperty("avg_elo")] public double? AverageFamilyElo;
 }

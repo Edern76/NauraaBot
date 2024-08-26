@@ -48,9 +48,9 @@ public class FullCardEmbedBuilder : ICardEmbedBuilder
         if (recap.Elo is not null && recap.Elo.HasValue)
         {
             double? familyElo = recap.AverageFamilyElo;
-            string familyEloString = familyElo.HasValue ? familyElo.ToString() : "-";
+            string familyEloString = familyElo.HasValue ? familyElo.Value.ToString("#.#") : "-";
             builder = builder.AddField("Elo (vs family average)",
-                $"{recap.Elo.Value.ToString()} ({familyEloString})");
+                $"{recap.Elo.Value.ToString("#.#")} ({familyEloString})");
         }
 
         return builder.Build();
