@@ -52,8 +52,6 @@ There are two ways to fetch a specific unique. However for this to work, the bot
 
 You can search for a specific unique by specifying its ID like this : `{{ALT_COREKS_B_YZ_11_U_4053}}`. When searching like this, the only parameter you may specify is the language, like this `{{ALT_COREKS_B_YZ_11_U_4053|FR}}`. Attempting to specify a rarity or a faction will cause an error. You can still use the `!` or `@` prefixes however.
 
-Please note that 
-
 #### Search by name and set ID/number
 
 You can also search a specific unique by specifying the name of the card (partially or fully), then the set and number of the unique as the first set of options. 
