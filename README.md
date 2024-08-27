@@ -65,12 +65,6 @@ For instance, `{{Daughter of Yggdrasil|COREKS, 5111}}` will get the 5111th Daugh
 - .NET 6 (SDK and runtime)
 - .NET EF Version 6.0.27 (`dotnet tool install --global dotnet-ef --version 6.0.27 `)
 
-## Planned features
-
-- Message throttling per user
-- Faction emojis
-- And more
-
 ## Compiling
 
 - Go to the `src` folder
