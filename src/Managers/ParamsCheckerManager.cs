@@ -41,6 +41,12 @@ public static class ParamsCheckerManager
                 string.Join(", ", availableLanguages)));
         }
 
+        if (searchParams.Set != null && !DatabaseProvider.Db.Sets.Any(s => s.ID == searchParams.Set))
+        {
+            errors.Add(ParamsErrorHandler.GetErrorMessage(ParamsErrorType.UNKNOWN_SET, searchParams.Set,
+                string.Join(", ", DatabaseProvider.Db.Sets.Select(s => s.ID))));
+        }
+
         return errors;
     }
 }

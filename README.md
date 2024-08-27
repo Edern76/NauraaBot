@@ -44,11 +44,21 @@ Prefixing `@` before the card name will show you the card name in all supported 
 
 You can get a random card by replacing the card's name in your query by `rand()`. All search parameters work with this. For instance, `{{rand()|C,MU|FR}}` will get a random French Muna common.
 
-### Unique ID Searching
+### Specific unique fetching
+
+There are two ways to fetch a specific unique :
+
+#### Unique ID Searching
 
 You can search for a specific unique by specifying its ID like this : `{{ALT_COREKS_B_YZ_11_U_4053}}`. When searching like this, the only parameter you may specify is the language, like this `{{ALT_COREKS_B_YZ_11_U_4053|FR}}`. Attempting to specify a rarity or a faction will cause an error. You can still use the `!` or `@` prefixes however.
 
 Please note that while the bot has access to most uniques at this time, it only updates new uniques each morning at 1AM CET, and some uniques may not be available at all due to Altered's API limitations. Furthermore, once the uniques are made private, the existing uniques might be removed from the bot if there is such a request from Equinox or a significant part of the community.
+
+#### Search by name and set ID/number
+
+You can also search a specific unique by specifying the name of the card (partially or fully), then the set and number of the unique as the first set of options. 
+
+For instance, `{{Daughter of Yggdrasil|COREKS, 5111}}` will get the 5111th Daughter of Yggdrasil unique from the Kickstarter set (which is equivalent to `{{ALT_COREKS_B_MU_12_U_5111}}`)
 
 ## Requirements
 

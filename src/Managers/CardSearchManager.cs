@@ -54,6 +54,13 @@ public static class CardSearchManager
                      u.CurrentFaction.ID == result.CurrentFaction.ID)).ToList();
             result = matchingUniques.ElementAt(RandomProvider.Random.Next(0, matchingUniques.Count));
         }
+        else if (searchParams.Set is not null && searchParams.Number is not null)
+        {
+            string uniqueID = CardUtils.GetUniqueIDFromBaseID(result.ID, searchParams.Set, searchParams.Number.Value);
+            result = DatabaseProvider.Db.Cards.Include(card => card.CurrentFaction).Include(card => card.MainFaction)
+                .Include(card => card.Rarity).Include(card => card.Set).Include(card => card.Type)
+                .FirstOrDefault(c => c.ID == uniqueID);
+        }
 
         return new Tuple<string?, Card?>(actualLanguage, result);
     }
