@@ -46,13 +46,13 @@ You can get a random card by replacing the card's name in your query by `rand()`
 
 ### Specific unique fetching
 
-There are two ways to fetch a specific unique :
+There are two ways to fetch a specific unique. However for this to work, the bot has to have indexed the unique. **It only updates new uniques each morning at 1AM CET, and only those in a tradelist at this time or having been scanned before the switch to private uniques can be indexed.**
 
 #### Unique ID Searching
 
 You can search for a specific unique by specifying its ID like this : `{{ALT_COREKS_B_YZ_11_U_4053}}`. When searching like this, the only parameter you may specify is the language, like this `{{ALT_COREKS_B_YZ_11_U_4053|FR}}`. Attempting to specify a rarity or a faction will cause an error. You can still use the `!` or `@` prefixes however.
 
-Please note that while the bot has access to most uniques at this time, it only updates new uniques each morning at 1AM CET, and some uniques may not be available at all due to Altered's API limitations. Furthermore, once the uniques are made private, the existing uniques might be removed from the bot if there is such a request from Equinox or a significant part of the community.
+Please note that 
 
 #### Search by name and set ID/number
 
