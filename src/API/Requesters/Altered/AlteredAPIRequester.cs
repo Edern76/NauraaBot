@@ -105,7 +105,7 @@ public static class AlteredAPIRequester
         LogUtils.Log($"Using language code {language} for request to Altered API.");
         request.AddHeader("Accept-Language", language);
         request.AddHeader("User-Agent",
-            "NauraaBot/0.7.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+            "NauraaBot/0.7.1"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
         request.AddHeader("Accept", "application/json");
 
         return request;
