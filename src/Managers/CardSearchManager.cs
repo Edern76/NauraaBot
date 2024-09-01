@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
+using NauraaBot.API.DTO;
+using NauraaBot.API.Requesters.Altered;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Providers;
 using NauraaBot.Core.Utils;
@@ -14,7 +17,7 @@ namespace NauraaBot.Managers;
 
 public static class CardSearchManager
 {
-    public static Tuple<string?, Card> SearchCard(string name, SearchParams searchParams)
+    public async static Task<Tuple<string?, Card>> SearchCard(string name, SearchParams searchParams)
     {
         /*
          * Approximate search algorithm (reminder for later) :
@@ -54,23 +57,47 @@ public static class CardSearchManager
                      u.CurrentFaction.ID == result.CurrentFaction.ID)).ToList();
             result = matchingUniques.ElementAt(RandomProvider.Random.Next(0, matchingUniques.Count));
         }
-        else if (searchParams.Set is not null && searchParams.Number is not null)
+        else if (result is not null && searchParams.Set is not null && searchParams.Number is not null)
         {
             string uniqueID = CardUtils.GetUniqueIDFromBaseID(result.ID, searchParams.Set, searchParams.Number.Value);
-            result = DatabaseProvider.Db.Cards.Include(card => card.CurrentFaction).Include(card => card.MainFaction)
-                .Include(card => card.Rarity).Include(card => card.Set).Include(card => card.Type)
-                .FirstOrDefault(c => c.ID == uniqueID);
+            Tuple<string, Unique> searchResult = await SearchUnique(uniqueID, searchParams);
+            result = searchResult.Item2;
         }
 
         return new Tuple<string?, Card?>(actualLanguage, result);
     }
 
-    public static Tuple<string, Unique> SeachUnique(string ID, SearchParams searchParams)
+    public async static Task<Tuple<string, Unique>> SearchUnique(string ID, SearchParams searchParams)
     {
         Unique unique = DatabaseProvider.Db.Uniques.Include(card => card.CurrentFaction)
             .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
             .Include(card => card.Type).FirstOrDefault(u => u.ID.ToUpper() == ID.ToUpper());
         string actualLanguage = searchParams.Language ?? "en";
+
+        if (unique is null)
+        {
+            Card tempCard = DatabaseProvider.PendingAdditions.FirstOrDefault(c => c.ID.ToUpper() == ID.ToUpper());
+            if (tempCard?.Names.Get(actualLanguage) is string name && !String.IsNullOrEmpty(name))
+            {
+                unique = Unique.FromCard(tempCard);
+            }
+            else
+            {
+                try
+                {
+                    LogUtils.Log($"Unique {ID} not found in database, fetching from Altered API");
+                    CardDTO dto = await AlteredAPIRequester.GetCard(ID);
+                    Card card = CardImportManager.DirectCreateUniqueSkeleton(dto, actualLanguage);
+                    DatabaseProvider.EnqueueCard(card);
+                    unique = Unique.FromCard(card);
+                }
+                catch (Exception e)
+                {
+                    LogUtils.Error(e.ToString());
+                    unique = null;
+                }
+            }
+        }
 
         return new Tuple<string, Unique>(actualLanguage, unique);
     }

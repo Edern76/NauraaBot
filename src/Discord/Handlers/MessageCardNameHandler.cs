@@ -128,7 +128,7 @@ public static class MessageCardNameHandler
             if (searchResult.Item2 is null)
             {
                 SearchParams secondPassParams = parsedParams with { Language = null };
-                searchResult = CardSearchManager.SearchCard(cardName, secondPassParams);
+                searchResult = await CardSearchManager.SearchCard(cardName, secondPassParams);
                 actualLanguage = parsedParams.Language?.ToLower() ?? searchResult.Item1;
             }
 

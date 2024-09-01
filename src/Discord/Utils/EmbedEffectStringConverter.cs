@@ -16,6 +16,8 @@ public static class EmbedEffectStringConverter
         }
 
         result = Regex.Replace(result, @"#(.+)#", m => $"*{m.Groups[1].Value}*");
+        result = Regex.Replace(result, @"\[\[(.*)\]\]", m => $"**__{m.Groups[1].Value}__**");
+        result = Regex.Replace(result, @"(?<!\[)\[([^[\]]*)\](?!\])", m => $"**{m.Groups[1].Value}**");
         return result;
     }
 }

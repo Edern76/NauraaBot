@@ -13,7 +13,7 @@ public class UniqueIDSearchHandler : ISearchHandler
 {
     public async Task<Tuple<string, Card>> Search(string query, SearchParams searchParams)
     {
-        Tuple<string, Unique> result = CardSearchManager.SeachUnique(query, searchParams);
+        Tuple<string, Unique> result = await CardSearchManager.SearchUnique(query, searchParams);
         return new Tuple<string, Card>(result.Item1, result.Item2);
     }
 }

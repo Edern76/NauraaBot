@@ -36,6 +36,9 @@ public class Config
     [YamlMember(Alias = "max_replies_per_message")]
     public int MaxRepliesPerMessages { get; set; }
 
+    [YamlMember(Alias = "save_pending_cards_periodicity")]
+    public string SavePendingCardsPeriodicity { get; set; }
+
     [YamlMember(Alias = "update_periodicity")]
     public string UpdatePeriodicity { get; set; }
 

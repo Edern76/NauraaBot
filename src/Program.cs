@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Threading.Tasks;
 using NauraaBot.Core.Config;
@@ -35,6 +36,7 @@ namespace NauraaBot
             }
 
             ScheduleUpdateJob();
+            ScheduleSavePendingCardsJob();
             EmoteProvider.InitializeEmotes();
             await ClientProvider.InitializeClient(ConfigProvider.ConfigInstance.Token);
 
@@ -57,6 +59,15 @@ namespace NauraaBot
                 UpdateCardDatabaseJob.GetTrigger(ConfigProvider.ConfigInstance.UpdatePeriodicity);
 
             SchedulerProvider.Scheduler.ScheduleJob(updateJobDetails, updateJobTrigger);
+        }
+
+        private static void ScheduleSavePendingCardsJob()
+        {
+            IJobDetail savePendingCardsJobDetails = SavePendingCardsJob.GetJobDetail();
+            ITrigger savePendingCardsJobTrigger =
+                SavePendingCardsJob.GetTrigger(ConfigProvider.ConfigInstance.SavePendingCardsPeriodicity);
+
+            SchedulerProvider.Scheduler.ScheduleJob(savePendingCardsJobDetails, savePendingCardsJobTrigger);
         }
     }
 }

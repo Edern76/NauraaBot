@@ -37,12 +37,7 @@ public static class AlteredAPIRequester
         }
 
         string languageHttpCode = Constants.LanguageHttpCodes[language];
-        RestRequest request = new RestRequest("/cards", Method.Get);
-        LogUtils.Log($"Using language code {languageHttpCode} for request to Altered API.");
-        request.AddHeader("Accept-Language", languageHttpCode);
-        request.AddHeader("User-Agent",
-            "NauraaBot/0.6.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
-        request.AddHeader("Accept", "application/json");
+        RestRequest request = BuildBaseRequest("/cards", languageHttpCode, Method.Get);
 
         if (settings.Pagination is not null)
         {
@@ -79,16 +74,46 @@ public static class AlteredAPIRequester
         string content = StringUtils.Decode(response!.Content);
         // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
         List<CardDTO> cardDtos = JsonConvert.DeserializeObject<List<CardDTO>>(content);
-        cardDtos.ForEach(c =>
-        {
-            c.Elements = c.ElementsToken is JObject obj ? obj.ToObject<ElementsDTO>() : new ElementsDTO();
-            c.Elements.CleanCostsAndPowers();
-        });
+        cardDtos.ForEach(c => { FixCardDto(ref c); });
         AlteredResponse
             alteredResponse = new AlteredResponse()
             {
                 Members = cardDtos, TotalItems = cardDtos.Count
             }; // Quick and dirty hack cause I don't want to rewrite other stuff that expects an AlteredResponse
         return alteredResponse;
+    }
+
+    public static async Task<CardDTO> GetCard(string ID, string language = "en")
+    {
+        if (!Constants.LanguageHttpCodes.ContainsKey(language))
+        {
+            throw new NotSupportedException($"Language code {language} is not supported");
+        }
+
+        string languageHttpCode = Constants.LanguageHttpCodes[language];
+        RestRequest request = BuildBaseRequest($"/cards/{ID}", languageHttpCode, Method.Get);
+        RestResponse response = await _client.ExecuteGetAsync(request);
+        string content = StringUtils.Decode(response!.Content);
+        CardDTO cardDto = JsonConvert.DeserializeObject<CardDTO>(content);
+        FixCardDto(ref cardDto);
+        return cardDto;
+    }
+
+    private static RestRequest BuildBaseRequest(string endpoint, string language, Method method = Method.Get)
+    {
+        RestRequest request = new RestRequest(endpoint, method);
+        LogUtils.Log($"Using language code {language} for request to Altered API.");
+        request.AddHeader("Accept-Language", language);
+        request.AddHeader("User-Agent",
+            "NauraaBot/0.7.0"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+        request.AddHeader("Accept", "application/json");
+
+        return request;
+    }
+
+    private static void FixCardDto(ref CardDTO c)
+    {
+        c.Elements = c.ElementsToken is JObject obj ? obj.ToObject<ElementsDTO>() : new ElementsDTO();
+        c.Elements.CleanCostsAndPowers();
     }
 }

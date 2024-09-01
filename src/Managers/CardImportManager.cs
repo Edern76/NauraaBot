@@ -9,6 +9,7 @@ using NauraaBot.API.Requesters.Altered;
 using NauraaBot.Core.Config;
 using NauraaBot.Core.Utils;
 using NauraaBot.Database.Models;
+using NauraaBot.Managers.Types;
 
 namespace NauraaBot.Managers;
 
@@ -213,6 +214,75 @@ public static class CardImportManager
         }
     }
 
+    public static Unique DirectCreateUniqueSkeleton(CardDTO dto, string language = "en")
+    {
+        Card card = CreateCard(dto, DatabaseProvider.Db.Sets.ToList(), DatabaseProvider.Db.Types.ToList(),
+            DatabaseProvider.Db.Rarities.ToList(), DatabaseProvider.Db.Factions.ToList(), language,
+            CardCreationMode.SKELETON);
+        Unique unique = Unique.FromCard(card);
+        return unique;
+    }
+
+    public static async Task SavePendingCardsToDatabase()
+    {
+        bool cardFoundInQueue;
+        int foundCards = 0;
+        do
+        {
+            cardFoundInQueue = DatabaseProvider.PendingAdditions.TryDequeue(out Card card);
+            if (card is not null)
+            {
+                try
+                {
+                    Card toAdd = await FillSingleCardMissingLanguages(card);
+                    if (toAdd.Rarity.ID.ToString() == "UNIQUE")
+                    {
+                        Unique unique = Unique.FromCard(toAdd);
+                        DatabaseProvider.Db.Add(unique);
+                        foundCards++;
+                    }
+                    else
+                    {
+                        DatabaseProvider.Db.Add(toAdd);
+                        foundCards++;
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogUtils.Error(e.ToString());
+                }
+            }
+        } while (cardFoundInQueue);
+
+        if (foundCards > 0)
+        {
+            LogUtils.Log($"Saving {foundCards} pending cards to database...");
+            try
+            {
+                await DatabaseProvider.Db.SaveChangesAsync();
+            }
+            catch (Exception e)
+            {
+                LogUtils.Error(e.ToString());
+            }
+
+            LogUtils.Log("Done saving pending cards to database.");
+        }
+    }
+
+    // Cannot use ref with async methods
+    public static async Task<Card> FillSingleCardMissingLanguages(Card card)
+    {
+        HashSet<string> missingLanguages = card.GetMissingLanguages();
+        foreach (string language in missingLanguages)
+        {
+            CardDTO dto = await AlteredAPIRequester.GetCard(card.ID, language);
+            FillLocalizedStrings(ref card, dto, language);
+        }
+
+        return card;
+    }
+
     private static async Task FillUniquesMissingLanguages(string faction = null)
     {
         LogUtils.Log("Checking for  uniques missing languages...");
@@ -362,10 +432,22 @@ public static class CardImportManager
     // Create a card object from English values
     // Filling in other languages will be handled in a different method
     private static Card CreateCard(CardDTO dto, List<CardSet> sets, List<CardType> types, List<Rarity> rarities,
-        List<Faction> factions)
+        List<Faction> factions, string language = "en", CardCreationMode mode = CardCreationMode.FULL)
     {
         Card card = CardSkeletonFromDTO(dto);
-        FillLocalizedStrings(ref card, dto, "en");
+        switch (mode)
+        {
+            case CardCreationMode.SKELETON:
+            case CardCreationMode.FULL:
+                FillLocalizedStrings(ref card, dto, language);
+                break;
+            case CardCreationMode.SINGLE_CARD:
+                throw new NotImplementedException(); //TODO: Fix
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(mode), mode, $"Unknown mode {mode}");
+        }
+
         LinkCardToRelatedEntities(ref card, dto, sets, types, rarities, factions);
         return card;
     }
