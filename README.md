@@ -46,7 +46,7 @@ You can get a random card by replacing the card's name in your query by `rand()`
 
 ### Specific unique fetching
 
-There are two ways to fetch a specific unique. However for this to work, the bot has to have indexed the unique. **It only updates new uniques each morning at 1AM CET, and only those in a tradelist at this time or having been scanned before the switch to private uniques can be indexed.**
+There are two ways to fetch a specific unique. Please note however that whichever you choose, if the bot has never seen this unique, it might take longer the first time to respond as it attempts to contact Altered's API. Furthermore, this might fail if the unique is non-public.
 
 #### Unique ID Searching
 
