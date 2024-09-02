@@ -13,11 +13,12 @@ public static class EmbedEffectStringConverter
                      .Where(e => e.Replaces is not null))
         {
             result = result.Replace(emote.Replaces!, emote.Code);
+            result = result.Replace(emote.Replaces!.ToLower(), emote.Code);
         }
 
         result = Regex.Replace(result, @"#(.+)#", m => $"*{m.Groups[1].Value}*");
-        result = Regex.Replace(result, @"\[\[(.*)\]\]", m => $"**__{m.Groups[1].Value}__**");
-        result = Regex.Replace(result, @"(?<!\[)\[([^[\]]*)\](?!\])", m => $"**{m.Groups[1].Value}**");
+        result = Regex.Replace(result, @"\[\[(.*?)\]\]", m => $"**__{m.Groups[1].Value}__**");
+        result = Regex.Replace(result, @"(?<!\[)\[([^[\]]*?)\](?!\])", m => $"**{m.Groups[1].Value}**");
         return result;
     }
 }
