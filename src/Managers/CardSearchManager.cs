@@ -44,7 +44,9 @@ public static class CardSearchManager
         string actualLanguage = nameSearchResult.Item1;
         List<Card> potentialMatches = nameSearchResult.Item2;
 
-        potentialMatches = CardFilter.FilterMatches(potentialMatches, searchParams.Rarity, searchParams.Faction);
+        potentialMatches = CardFilter.FilterMatches(potentialMatches, searchParams.Rarity, searchParams.Faction)
+            .Where(c => searchParams.RequiredLanguage is null || c.Names.Get(searchParams.RequiredLanguage) is not null)
+            .ToList();
         Card result = potentialMatches.FirstOrDefault();
 
         if (searchParams.Rarity == "U" && result is not null)
@@ -54,7 +56,10 @@ public static class CardSearchManager
                 .Include(unique => unique.Type).ToList().Where(u =>
                     u.Names.Get(actualLanguage) == result.Names.Get(actualLanguage) &&
                     ((searchParams.Faction == null && (u.CurrentFaction.ID == result.CurrentFaction.ID)) ||
-                     u.CurrentFaction.ID == result.CurrentFaction.ID)).ToList();
+                     u.CurrentFaction.ID == result.CurrentFaction.ID) && (searchParams.RequiredLanguage is null ||
+                                                                          result.Names.Get(
+                                                                                  searchParams.RequiredLanguage) is not
+                                                                              null)).ToList();
             result = matchingUniques.ElementAt(RandomProvider.Random.Next(0, matchingUniques.Count));
         }
         else if (result is not null && searchParams.Set is not null && searchParams.Number is not null)
@@ -72,7 +77,7 @@ public static class CardSearchManager
         Unique unique = DatabaseProvider.Db.Uniques.Include(card => card.CurrentFaction)
             .Include(card => card.MainFaction).Include(card => card.Rarity).Include(card => card.Set)
             .Include(card => card.Type).FirstOrDefault(u => u.ID.ToUpper() == ID.ToUpper());
-        string actualLanguage = searchParams.Language ?? "en";
+        string actualLanguage = searchParams.Language ?? (searchParams.RequiredLanguage ?? "en");
 
         if (unique is null)
         {
@@ -86,7 +91,7 @@ public static class CardSearchManager
                 try
                 {
                     LogUtils.Log($"Unique {ID} not found in database, fetching from Altered API");
-                    CardDTO dto = await AlteredAPIRequester.GetCard(ID);
+                    CardDTO dto = await AlteredAPIRequester.GetCard(ID, actualLanguage);
                     Card card = CardImportManager.DirectCreateUniqueSkeleton(dto, actualLanguage);
                     DatabaseProvider.EnqueueCard(card);
                     unique = Unique.FromCard(card);
