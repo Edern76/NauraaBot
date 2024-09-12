@@ -20,7 +20,7 @@ public class UniquesRankerRequester
 
     static UniquesRankerRequester()
     {
-        RestClientOptions options = new RestClientOptions("https://uniquesranking.onrender.com/");
+        RestClientOptions options = new RestClientOptions("https://uniquesranking.com/");
         _client = new RestClient(options);
         ServicePointManager.SecurityProtocol =
             SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -33,8 +33,13 @@ public class UniquesRankerRequester
             RestRequest request = new RestRequest($"/json/{uniqueId}", Method.Get);
             RestResponse response = await _client.ExecuteGetAsync(request);
             string content = StringUtils.Decode(response!.Content);
-            UniqueElos uniqueElos = JsonConvert.DeserializeObject<UniqueElos>(content);
+            UniquesRankingResponse uniquesResponse = JsonConvert.DeserializeObject<UniquesRankingResponse>(content);
+            if (uniquesResponse.Error)
+            {
+                throw new KeyNotFoundException($"UniquesRanking has no data for unique {uniqueId}");
+            }
 
+            UniqueElos uniqueElos = UniqueElos.FromResponse(uniquesResponse);
             return uniqueElos;
         }
         catch (HttpRequestException e)
