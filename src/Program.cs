@@ -30,10 +30,10 @@ namespace NauraaBot
                 await CardImportManager.ImportCardsIntoDatabase();
             }
 
-            if (forceUpdate)
+            /*if (forceUpdate)
             {
                 _ = Task.Run(async () => await CardImportManager.ImportUniquesIntoDatabase());
-            }
+            }*/
 
             ScheduleUpdateJob();
             ScheduleSavePendingCardsJob();

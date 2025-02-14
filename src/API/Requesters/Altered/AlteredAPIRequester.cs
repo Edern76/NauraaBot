@@ -108,6 +108,8 @@ public static class AlteredAPIRequester
             "NauraaBot/0.7.3"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
         request.AddHeader("Accept", "application/json");
 
+        request.AddParameter("locale", language);
+
         return request;
     }
 
