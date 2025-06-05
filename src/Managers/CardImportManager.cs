@@ -68,7 +68,7 @@ public static class CardImportManager
                     LogUtils.Log("No english cards to import or update.");
                 }
             }
-
+            
             currentPage++;
         }
 
@@ -157,8 +157,10 @@ public static class CardImportManager
         {
             LogUtils.Log($"{cardsMissingLanguages.Count} cards are missing languages.");
             Dictionary<string, List<CardDTO>> languageDtos = new Dictionary<string, List<CardDTO>>();
+            string[] workingLanguages = new string[] { "fr" }; // Because the API is fucking broken right now
+            // TODO: Fix this somehow, maybe use AlteredDB or make our own API instead
             IEnumerable<String> supportedLanguages =
-                ConfigProvider.ConfigInstance.SupportedLanguages.Where(l => l != "en");
+                ConfigProvider.ConfigInstance.SupportedLanguages.Where(l => l != "en" && workingLanguages.Contains(l));
             foreach (string language in supportedLanguages)
             {
                 int currentPage = 1;
@@ -180,7 +182,6 @@ public static class CardImportManager
                             languageDtos[language].AddRange(dtos);
                         }
                     }
-
                     currentPage++;
                 }
             }

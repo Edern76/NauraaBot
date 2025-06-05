@@ -17,7 +17,7 @@ public static class AlteredAPIRequester
 
     static AlteredAPIRequester()
     {
-        RestClientOptions options = new RestClientOptions("https://api.altered.gg/");
+        RestClientOptions options = new RestClientOptions("https://edern.ninja/altered");
         _client = new RestClient(options);
         ServicePointManager.SecurityProtocol =
             SecurityProtocolType.Tls12 | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls;
@@ -39,16 +39,13 @@ public static class AlteredAPIRequester
         string languageHttpCode = Constants.LanguageHttpCodes[language];
         RestRequest request = BuildBaseRequest("/cards", languageHttpCode, Method.Get);
 
-        if (settings.Pagination is not null)
-        {
-            request.AddParameter("pagination", settings.Pagination.ToString());
-        }
 
         if (settings.MaxCardsPerRequest is not null)
         {
             request.AddParameter("itemsPerPage", settings.MaxCardsPerRequest.ToString());
         }
 
+        request.AddParameter("locale", languageHttpCode);
         if (settings.Rarity is not null)
         {
             request.AddParameter("rarity[]", "UNIQUE");
@@ -71,10 +68,19 @@ public static class AlteredAPIRequester
         }
 
         RestResponse response = await _client.ExecuteGetAsync(request);
+
         string content = StringUtils.Decode(response!.Content);
-        // Built-in RestSharp deserialization uses .NET deserialization which I do not trust
-        List<CardDTO> cardDtos = JsonConvert.DeserializeObject<List<CardDTO>>(content);
-        cardDtos.ForEach(c => { FixCardDto(ref c); });
+
+        AlteredResponse parsedResponse = JsonConvert.DeserializeObject<AlteredResponse>(content);
+
+        if (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            LogUtils.Error($"Got 500 with URL : {response.ResponseUri}"); // THIS IS FUCKING BULLSHIT
+        }
+
+        List<CardDTO> cardDtos = parsedResponse.Members ?? new List<CardDTO>();
+
+        cardDtos?.ForEach(c => { FixCardDto(ref c); });
         AlteredResponse
             alteredResponse = new AlteredResponse()
             {
@@ -104,8 +110,10 @@ public static class AlteredAPIRequester
         RestRequest request = new RestRequest(endpoint, method);
         LogUtils.Log($"Using language code {language} for request to Altered API.");
         request.AddHeader("Accept-Language", language);
+        request.AddHeader("cache-control", "no-cache");
         request.AddHeader("User-Agent",
             "NauraaBot/0.7.3"); // TODO: Find a way to increment this automatically from the assembly (not a priority though)
+
         request.AddHeader("Accept", "application/json");
 
         return request;
@@ -113,6 +121,11 @@ public static class AlteredAPIRequester
 
     private static void FixCardDto(ref CardDTO c)
     {
+        if (c.ElementsToken is string)
+        {
+            c.ElementsToken = JObject.Parse(c.ElementsToken.ToString());
+        }
+
         c.Elements = c.ElementsToken is JObject obj ? obj.ToObject<ElementsDTO>() : new ElementsDTO();
         c.Elements.CleanCostsAndPowers();
     }

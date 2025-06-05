@@ -11,7 +11,8 @@ public class AlteredAPIRequesterSettings : ICloneable
 
     public static readonly AlteredAPIRequesterSettings Default = new AlteredAPIRequesterSettings()
     {
-        MaxCardsPerRequest = 100,
+        MaxCardsPerRequest =
+            100, // SOMEHOW, this fails with 36, but works with 100 (I don't think it returns 100 though)
         Pagination = true,
     };
 
