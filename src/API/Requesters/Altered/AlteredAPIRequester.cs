@@ -116,6 +116,8 @@ public static class AlteredAPIRequester
 
         request.AddHeader("Accept", "application/json");
 
+        request.AddParameter("locale", language);
+
         return request;
     }
 
