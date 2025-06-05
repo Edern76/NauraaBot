@@ -22,6 +22,8 @@ public static class CardImportManager
         int cardsImported = 0;
         int currentPage = 1;
         int cardsFoundOnPage = -1;
+        HashSet<string> existingCardsIds = new HashSet<string>(DatabaseProvider.Db.Cards.Select(card => card.ID));
+
         while (cardsFoundOnPage != 0)
         {
             int cardsImportedOnPage = 0;
@@ -34,9 +36,6 @@ public static class CardImportManager
             {
                 await CreateMissingRelatedEntities(dtos);
 
-                List<Card> existingCards = DatabaseProvider.Db.Cards.ToList();
-                List<string> existingCardsIds = existingCards.Select(card => card.ID).ToList();
-
                 List<CardSet> sets = DatabaseProvider.Db.Sets.ToList();
                 List<CardType> types = DatabaseProvider.Db.Types.ToList();
                 List<Rarity> rarities = DatabaseProvider.Db.Rarities.ToList();
@@ -48,6 +47,7 @@ public static class CardImportManager
                     if (!existingCardsIds.Contains(card.ID))
                     {
                         DatabaseProvider.Db.Add(card);
+                        existingCardsIds.Add(card.ID);
                     }
                     else
                     {
@@ -68,7 +68,7 @@ public static class CardImportManager
                     LogUtils.Log("No english cards to import or update.");
                 }
             }
-            
+
             currentPage++;
         }
 
@@ -156,7 +156,8 @@ public static class CardImportManager
         if (cardsMissingLanguages.Count > 0)
         {
             LogUtils.Log($"{cardsMissingLanguages.Count} cards are missing languages.");
-            Dictionary<string, List<CardDTO>> languageDtos = new Dictionary<string, List<CardDTO>>();
+            Dictionary<string, Dictionary<string, CardDTO>> languageDtos =
+                new Dictionary<string, Dictionary<string, CardDTO>>();
             string[] workingLanguages = new string[] { "fr" }; // Because the API is fucking broken right now
             // TODO: Fix this somehow, maybe use AlteredDB or make our own API instead
             IEnumerable<String> supportedLanguages =
@@ -171,17 +172,23 @@ public static class CardImportManager
                         AlteredAPIRequesterSettings.Default, null, currentPage);
                     List<CardDTO> dtos = apiResponse.Members;
                     cardsFoundOnPage = dtos.Count;
+                    Dictionary<string, CardDTO> dict = new Dictionary<string, CardDTO>();
+                    dtos.ForEach(dto => dict.Add(dto.Reference, dto));
                     if (cardsFoundOnPage > 0)
                     {
                         if (!languageDtos.ContainsKey(language))
                         {
-                            languageDtos.Add(language, dtos);
+                            languageDtos.Add(language, dict);
                         }
                         else
                         {
-                            languageDtos[language].AddRange(dtos);
+                            foreach (KeyValuePair<string, CardDTO> entry in dict)
+                            {
+                                languageDtos[language][entry.Key] = entry.Value;
+                            }
                         }
                     }
+
                     currentPage++;
                 }
             }
@@ -191,12 +198,14 @@ public static class CardImportManager
                 Card mutableCard = cardMissingLanguages;
                 foreach (string language in supportedLanguages)
                 {
-                    try
+                    Dictionary<string, CardDTO> currentDict = languageDtos[language];
+                    List<string> keys = currentDict.Keys.ToList();
+                    if (keys.Contains(cardMissingLanguages.ID))
                     {
-                        CardDTO dto = languageDtos[language].First(dto => dto.Reference == cardMissingLanguages.ID);
+                        CardDTO dto = languageDtos[language][cardMissingLanguages.ID];
                         FillLocalizedStrings<Card>(ref mutableCard, dto, language);
                     }
-                    catch (InvalidOperationException)
+                    else
                     {
                         LogUtils.Error(
                             $"No data found for card {cardMissingLanguages.Names.en} ({cardMissingLanguages.ID}) in language {language}");
